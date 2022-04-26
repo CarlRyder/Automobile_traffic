@@ -1,4 +1,4 @@
-// Made by Y. Sendov. Start work - March 2022.
+// Made by Y. Sendov and S. Babaev. Start work - March 2022.
 
 #include <stdio.h>
 #include <math.h>
@@ -13,6 +13,8 @@ void Reshape(int width, int height)
     gluOrtho2D(-1, 1, -1, 1);
     glMatrixMode(GL_MODELVIEW);
 }
+
+// Функция чек
 
 void Draw(void)
 {
