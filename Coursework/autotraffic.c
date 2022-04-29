@@ -83,10 +83,7 @@ void keyboard(unsigned char key, int x, int y)
     if (key == ESCAPE)
         exit(0);
 }
-void check()
-{
-    printf("chech");
-}
+
 int main(int argc, char* argv[])
 {
     glutInit(&argc, argv);
@@ -99,6 +96,4 @@ int main(int argc, char* argv[])
     glutKeyboardFunc(keyboard);
 
     glutMainLoop();
-    //
-
 }
