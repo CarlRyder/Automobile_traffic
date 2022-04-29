@@ -1,49 +1,82 @@
 // Made by Y. Sendov and S. Babaev. Start work - March 2022.
 
 #include <stdio.h>
-#include <math.h>
 #include <string.h>
+#include <math.h>
 #include <GL/glut.h>
 
-void Reshape(int width, int height)
+#define WINDOW_NAME "Car Traffic Simulator"
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 800
+
+/* ширина и высота окна */
+GLint Width = 800, Height = 800;
+
+const int button_width = 350;
+const int button_height = 50;
+
+void menu_buttons(int h)
 {
-    glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(-1, 1, -1, 1);
-    glMatrixMode(GL_MODELVIEW);
+    int middle = Width / 2;
+
+    int left, right, top, bottom;
+    left = middle - button_width / 2;
+    right = left + button_width;
+    bottom = (Height - button_height) / 2;
+    top = bottom + button_height;
+
+    glColor3ub(138, 43, 226);
+
+    glBegin(GL_QUADS);
+    glVertex2i(left, bottom);
+    glVertex2i(left, top);
+    glVertex2i(right, top);
+    glVertex2i(right, bottom);
+    glEnd();
 }
 
-// Функция чек
-
-void Draw(void)
+/* управляет всем выводом на экран */
+void Display(void)
 {
+    glClearColor(0.102, 0.082, 0.247, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glColor3f(0.0f, 0.0f, 1.0f);
-    glLineWidth(1);
+    menu_buttons(10);
 
-    glBegin(GL_LINES);
-    glVertex2f(0, 0.5f);
-    glVertex2f(0, -0.5f);
-    glEnd();
+    glFinish();
+}
 
-    glFlush();
+/* Вызывается при изменении размеров окна */
+void Reshape(GLint w, GLint h)
+{
+    Width = w;
+    Height = h;
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, w, 0, h, -1.0, 1.0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
+
+/* Обрабатывает сообщения от клавиатуры */
+void Keyboard(unsigned char key, int x, int y)
+{
+    #define ESCAPE '\033'
+    if (key == ESCAPE)
+        exit(0);
 }
 
 int main(int argc, char* argv[])
 {
     glutInit(&argc, argv);
-    glutInitWindowSize(800, 800);
-    glutInitWindowPosition(0, 0);
-
     glutInitDisplayMode(GLUT_RGB);
-    glutCreateWindow("Simulation of automobile traffic");
+    glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+    glutCreateWindow(WINDOW_NAME);
 
+    glutDisplayFunc(Display);
     glutReshapeFunc(Reshape);
-    glutDisplayFunc(Draw);
-    glClearColor(0, 0, 0, 0);
+    glutKeyboardFunc(Keyboard);
 
     glutMainLoop();
-    return 0;
 }
