@@ -8,46 +8,64 @@
 #define WINDOW_NAME "Car Traffic Simulator"
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 800
+#define BUTTON_WIDTH 350
+#define BUTTON_HEIGHT 50
 
-/* ширина и высота окна */
 GLint Width = 800, Height = 800;
 
-const int button_width = 350;
-const int button_height = 50;
+void drawstring(float x, float y, char* string)
+{
+    glRasterPos2i(x, y);
+    for (char* c = string; *c != '\0'; c++) 
+    {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+    }
+}
 
 void menu_buttons(int h)
 {
-    int middle = Width / 2;
+    int midX = Width / 2;
+    int midY = Height / 2;
 
     int left, right, top, bottom;
-    left = middle - button_width / 2;
-    right = left + button_width;
-    bottom = (Height - button_height) / 2;
-    top = bottom + button_height;
+    left = midX - BUTTON_WIDTH / 2;
+    right = left + BUTTON_WIDTH;
+    bottom = midY - BUTTON_HEIGHT / 2;
+    top = bottom + BUTTON_HEIGHT;
 
     glColor3ub(138, 43, 226);
-
     glBegin(GL_QUADS);
-    glVertex2i(left, bottom);
-    glVertex2i(left, top);
-    glVertex2i(right, top);
-    glVertex2i(right, bottom);
+    glVertex2i(left, bottom + (h - 3) * BUTTON_HEIGHT / 2);
+    glVertex2i(left, top + (h - 3) * BUTTON_HEIGHT / 2);
+    glVertex2i(right, top + (h - 3) * BUTTON_HEIGHT / 2);
+    glVertex2i(right, bottom + (h - 3) * BUTTON_HEIGHT / 2);
     glEnd();
 }
 
-/* управляет всем выводом на экран */
-void Display(void)
+void text_buttons(int flag)
+{
+    glColor3ub(255, 255, 255);
+    if (flag == 0) drawstring(Width / 2 - 115, Height - 200, "CAR TRAFFIC SIMULATOR");
+    else if (flag == 1) drawstring(Width / 2 - 76, Height - 356, "Automobile traffic");
+    else if (flag == 2) drawstring(Width / 2 - 38, Height - 432, "Settings");
+    else if (flag == 3) drawstring(Width / 2 - 38, Height - 506, "About us");
+    else if (flag == 4) drawstring(Width / 2 - 15, Height - 581, "Exit");
+}
+
+void display()
 {
     glClearColor(0.102, 0.082, 0.247, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    menu_buttons(10);
+    // Buttons
+    for (int i = 5; i > -5; i -= 3) menu_buttons(i);
+    // Text buttons
+    for (int i = 0; i < 5; i++) text_buttons(i);
 
     glFinish();
 }
 
-/* Вызывается при изменении размеров окна */
-void Reshape(GLint w, GLint h)
+void reshape(GLint w, GLint h)
 {
     Width = w;
     Height = h;
@@ -59,8 +77,7 @@ void Reshape(GLint w, GLint h)
     glLoadIdentity();
 }
 
-/* Обрабатывает сообщения от клавиатуры */
-void Keyboard(unsigned char key, int x, int y)
+void keyboard(unsigned char key, int x, int y)
 {
     #define ESCAPE '\033'
     if (key == ESCAPE)
@@ -74,9 +91,9 @@ int main(int argc, char* argv[])
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     glutCreateWindow(WINDOW_NAME);
 
-    glutDisplayFunc(Display);
-    glutReshapeFunc(Reshape);
-    glutKeyboardFunc(Keyboard);
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutKeyboardFunc(keyboard);
 
     glutMainLoop();
 }
