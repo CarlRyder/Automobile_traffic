@@ -18,9 +18,7 @@
 #define COLOR_MENU_BLUE 0.247 
 
 GLint Width = 800, Height = 800;
-bool mouse_status = 0;
-int mouse_x = 0;
-int mouse_y = 0;
+bool menu_activity = false;
 
 struct menu_button
 {
@@ -73,7 +71,6 @@ void text_buttons(struct menu_button* button, int flag)
     if (button != NULL)
     {
         int delta = (button->x_coords[2] - button->x_coords[0]);
-        // button->x_coords[0] - 76
         if (flag == 1) drawstring(delta - 20, button->y_coords[0] - 0.6 * BUTTON_HEIGHT, "Automobile traffic");
         else if (flag == 2) drawstring(delta + 15, button->y_coords[0] - 0.6 * BUTTON_HEIGHT, "Settings");
         else if (flag == 3) drawstring(delta + 15, button->y_coords[0] - 0.6 * BUTTON_HEIGHT, "About us");
@@ -81,26 +78,32 @@ void text_buttons(struct menu_button* button, int flag)
     }
 }
 
-
-void display()
+void processing_buttons(int button)
 {
-    glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
-    glClear(GL_COLOR_BUFFER_BIT);
 
+}
+
+void menu()
+{
+    bool menu_activity = true;
     struct menu_button first_button, second_button, third_button, fourth_button;
     // Drawing menu buttons
-    menu_buttons(&first_button, 4); 
+    menu_buttons(&first_button, 4);
     menu_buttons(&second_button, 1);
-    menu_buttons(&third_button, -2); 
+    menu_buttons(&third_button, -2);
     menu_buttons(&fourth_button, -5);
-
     // Rendering text in the menu
     text_buttons(NULL, 0);
     text_buttons(&first_button, 1);
     text_buttons(&second_button, 2);
     text_buttons(&third_button, 3);
     text_buttons(&fourth_button, 4);
+    // Processing mouse clicks
+    
+}
 
+void coord_lines()
+{
     glColor3ub(255, 255, 255);
     glBegin(GL_LINES);
     glVertex2i(400, 0);
@@ -108,8 +111,20 @@ void display()
     glVertex2i(0, 400);
     glVertex2i(800, 400);
     glEnd();
+}
 
-    glFinish();
+void display()
+{
+    glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glLoadIdentity();
+    /* -------------------------- */
+
+    menu();
+    coord_lines();
+
+    /* -------------------------- */
+    glutSwapBuffers();
 }
 
 void reshape(GLint w, GLint h)
@@ -133,7 +148,19 @@ void mouse_pressed(int button, int state, int x, int y)
 {
     switch (button)
     {
-    case GLUT_LEFT_BUTTON: glutSetWindowTitle("LEFT BUTTON"); break;
+    case GLUT_LEFT_BUTTON: 
+    {
+        if (state == GLUT_DOWN)
+        {
+            printf("%d | %d\n", x, y);
+            if (x < 575 && x > 275 && y > 175 && y < 225)
+            {
+                printf("nynyny");
+                exit(0);
+            }
+        }
+        break;
+    }
     case GLUT_RIGHT_BUTTON: glutSetWindowTitle("RIGHT BUTTON"); break;
     }
 }
@@ -148,7 +175,7 @@ void keyboard(unsigned char key, int x, int y)
 int main(int argc, char* argv[])
 {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     glutCreateWindow(WINDOW_NAME);
 
