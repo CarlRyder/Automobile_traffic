@@ -80,7 +80,10 @@ void text_buttons(struct menu_button* button, int flag)
 
 void processing_buttons(int button)
 {
+    if (button == 3)
+    {
 
+    }
 }
 
 void menu()
@@ -98,8 +101,6 @@ void menu()
     text_buttons(&second_button, 2);
     text_buttons(&third_button, 3);
     text_buttons(&fourth_button, 4);
-    // Processing mouse clicks
-    
 }
 
 void coord_lines()
@@ -153,11 +154,8 @@ void mouse_pressed(int button, int state, int x, int y)
         if (state == GLUT_DOWN)
         {
             printf("%d | %d\n", x, y);
-            if (x < 575 && x > 275 && y > 175 && y < 225)
-            {
-                printf("nynyny");
-                exit(0);
-            }
+            if (x <= 575 && x >= 275 && y >= 575 && y <= 625) exit(0);
+            else if (x <= 575 && x >= 275 && y >= 500 && y <= 550) processing_buttons(3);
         }
         break;
     }
