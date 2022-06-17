@@ -19,6 +19,7 @@
 
 GLint Width = 800, Height = 800;
 bool menu_activity = false;
+bool menu_button_3 = false;
 
 struct menu_button
 {
@@ -33,6 +34,17 @@ void drawstring(float x, float y, char* string)
     {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
     }
+}
+
+void coord_lines()
+{
+    glColor3ub(255, 255, 255);
+    glBegin(GL_LINES);
+    glVertex2i(400, 0);
+    glVertex2i(400, 800);
+    glVertex2i(0, 400);
+    glVertex2i(800, 400);
+    glEnd();
 }
 
 void menu_buttons(struct menu_button* button, int h)
@@ -80,15 +92,45 @@ void text_buttons(struct menu_button* button, int flag)
 
 void processing_buttons(int button)
 {
+    int delta = BUTTON_HEIGHT;
+    int midX = Width / 2;
+    int midY = Height / 2;
+    int left, right, top, bottom;
+    left = midX - BUTTON_WIDTH / 2;
+    right = left + BUTTON_WIDTH;
+    bottom = midY - BUTTON_HEIGHT / 2;
+    top = bottom + BUTTON_HEIGHT;
     if (button == 3)
     {
+        menu_button_3 = true;
+        glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glColor3ub(255, 255, 255);
+        drawstring(Width / 2 - 115, Height - 200, "CAR TRAFFIC SIMULATOR");
+        drawstring(Width / 2 - 47, Height - 300, "Developers:");
+        drawstring(Width / 2 - 140, Height - 330, "Sendov Yakov Denisovich | @cryder");
+        drawstring(Width / 2 - 160, Height - 360, "Babaev Salavat Shakirovich | @lilbabidjon");
+        drawstring(Width / 2 - 63, Height - 440, "4831001/10003");
+        drawstring(Width / 4, Height - 470, "Institute of Cybersecurity and Information Protection");
+        drawstring(Width / 6, Height - 500, "Copyright (c) 2022 Saint-Petersburg Polytechnic University, Russia");
 
+        glColor3ub(138, 43, 226);
+        glBegin(GL_QUADS);
+        glVertex2i(left, bottom + (-7) * delta / 2);
+        glVertex2i(left, top + (-7) * delta / 2);
+        glVertex2i(right, top + (-7) * delta / 2);
+        glVertex2i(right, bottom + (-7) * delta / 2);
+        glEnd();
+
+        glColor3ub(255, 255, 255);
+        drawstring(Width / 2 - 20, Height - 580, "Back");
+        menu_activity = false;
+        glutSwapBuffers();
     }
 }
 
 void menu()
 {
-    bool menu_activity = true;
     struct menu_button first_button, second_button, third_button, fourth_button;
     // Drawing menu buttons
     menu_buttons(&first_button, 4);
@@ -101,17 +143,7 @@ void menu()
     text_buttons(&second_button, 2);
     text_buttons(&third_button, 3);
     text_buttons(&fourth_button, 4);
-}
-
-void coord_lines()
-{
-    glColor3ub(255, 255, 255);
-    glBegin(GL_LINES);
-    glVertex2i(400, 0);
-    glVertex2i(400, 800);
-    glVertex2i(0, 400);
-    glVertex2i(800, 400);
-    glEnd();
+    menu_activity = true;
 }
 
 void display()
@@ -122,7 +154,7 @@ void display()
     /* -------------------------- */
 
     menu();
-    coord_lines();
+    //coord_lines();
 
     /* -------------------------- */
     glutSwapBuffers();
@@ -151,11 +183,19 @@ void mouse_pressed(int button, int state, int x, int y)
     {
     case GLUT_LEFT_BUTTON: 
     {
-        if (state == GLUT_DOWN)
+        printf("%d | %d\n", x, y);
+        if (state == GLUT_DOWN && menu_activity == true)
         {
-            printf("%d | %d\n", x, y);
             if (x <= 575 && x >= 275 && y >= 575 && y <= 625) exit(0);
             else if (x <= 575 && x >= 275 && y >= 500 && y <= 550) processing_buttons(3);
+        }
+        else if (state == GLUT_DOWN && menu_button_3 == true)
+        {
+            if (x <= 575 && x >= 275 && y >= 550 && y <= 600)
+            {
+                menu_button_3 == false;
+                glutPostRedisplay();
+            }
         }
         break;
     }
