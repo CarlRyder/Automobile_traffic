@@ -127,6 +127,14 @@ void processing_buttons(int button)
         menu_activity = false;
         glutSwapBuffers();
     }
+    else if (button == 2)
+    {
+
+    }
+    else if (button == 1)
+    {
+
+    }
 }
 
 void menu()
@@ -174,7 +182,7 @@ void reshape(GLint w, GLint h)
 
 void mouse_move(int ax, int ay)
 {
-    glutSetWindowTitle("MOVE");
+    //glutSetWindowTitle("MOVE");
 }
 
 void mouse_pressed(int button, int state, int x, int y)
@@ -199,7 +207,7 @@ void mouse_pressed(int button, int state, int x, int y)
         }
         break;
     }
-    case GLUT_RIGHT_BUTTON: glutSetWindowTitle("RIGHT BUTTON"); break;
+    case GLUT_RIGHT_BUTTON: break;
     }
 }
 
