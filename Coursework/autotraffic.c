@@ -78,6 +78,7 @@ void get_BMP()
         glBegin(GL_POINTS);
         glVertex2i(x_start, y_start);
         glEnd();
+        memset(RGB, 0, sizeof(RGB));
         x_start++;
         if (x_start >= 800)
         {
@@ -468,7 +469,8 @@ void mouse_pressed(int button, int state, int x, int y)
             else if (x <= 575 && x >= 305 && y >= 550 && y <= 600)
             {
                 menu_button_1 = false;
-                map_choose();
+                get_BMP();
+                //map_choose();
             }
         }
         else if (state == GLUT_DOWN && map_button == true)
