@@ -1,4 +1,5 @@
 /* Copyright (c) Yakov D. Sendov & Salavat S. Babaev, 2022 */
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <stdio.h>
 #include <string.h>
@@ -25,6 +26,7 @@ bool menu_button_3 = false;
 bool menu_button_2 = false;
 bool menu_button_1 = false;
 bool menu_changes_2 = false;
+bool map_button = false;
 
 struct menu_button
 {
@@ -59,6 +61,33 @@ void coord_lines()
     glEnd();
 }
 
+void get_BMP()
+{
+    glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    unsigned char RGB[3] = { 0 };
+    FILE* file = fopen("Texture.bmp", "rb");
+    int x_start = 0;
+    int y_start = 800;
+    fseek(file, 54, 0);
+    while (!feof(file))
+    {
+        fread(&RGB, sizeof(unsigned char), 3, file);
+        glColor3ub(RGB[0], RGB[1], RGB[2]);
+        glPointSize(1);
+        glBegin(GL_POINTS);
+        glVertex2i(x_start, y_start);
+        glEnd();
+        x_start++;
+        if (x_start >= 800)
+        {
+            y_start--;
+            x_start = 0;
+        }
+    }
+    glutSwapBuffers();
+}
+
 void menu_buttons(struct menu_button* button, int h)
 {
     int delta = BUTTON_HEIGHT;
@@ -78,14 +107,39 @@ void menu_buttons(struct menu_button* button, int h)
     glVertex2i(right, bottom + (h - 3) * delta / 2);
     glEnd();
 
-    button->x_coords[0] = left;
-    button->y_coords[0] = 800 - bottom + (h - 3) * delta / 2;
-    button->x_coords[1] = button->x_coords[0];
-    button->y_coords[1] = 800 - top + (h - 3) * delta / 2;
-    button->x_coords[2] = right;
-    button->y_coords[2] = button->y_coords[1];
-    button->x_coords[3] = button->x_coords[2];
-    button->y_coords[3] = button->y_coords[0];
+    if (button != NULL)
+    {
+        button->x_coords[0] = left;
+        button->y_coords[0] = 800 - bottom + (h - 3) * delta / 2;
+        button->x_coords[1] = button->x_coords[0];
+        button->y_coords[1] = 800 - top + (h - 3) * delta / 2;
+        button->x_coords[2] = right;
+        button->y_coords[2] = button->y_coords[1];
+        button->x_coords[3] = button->x_coords[2];
+        button->y_coords[3] = button->y_coords[0];
+    }
+}
+
+void map_choose()
+{
+    map_button = true;
+    glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3ub(255, 255, 255);
+    //coord_lines();
+    drawstring(Width / 2 - 95, Height - 200, "AUTOMOBILE TRAFFIC");
+    menu_buttons(NULL, 7);
+    menu_buttons(NULL, 4);
+    menu_buttons(NULL, 1);
+    menu_buttons(NULL, -5);
+
+    glColor3ub(255, 255, 255);
+    drawstring(Width / 2 - 40, Height - 305, "Motorway");
+    drawstring(Width / 2 - 100, Height - 380, "Road with an intersection");
+    drawstring(Width / 2 - 120, Height - 455, "Road with several intersections");
+    drawstring(Width / 2 - 20, Height - 605, "Back"); // motorway, road with an intersection, road with several intersections
+    menu_activity = false;
+    glutSwapBuffers();
 }
 
 void text_buttons(struct menu_button* button, int flag)
@@ -257,7 +311,19 @@ void processing_buttons(int button)
         glClear(GL_COLOR_BUFFER_BIT);
         glColor3ub(255, 255, 255);
         //coord_lines();
-        drawstring(Width / 2 - 70, Height - 200, "Automobile traffic");
+        drawstring(Width / 2 - 95, Height - 200, "AUTOMOBILE TRAFFIC");
+        drawstring(Width / 2 - 200, Height - 270, "Good afternoon! A Car Traffic Simulator welcomes you.");
+        drawstring(Width / 2 - 180, Height - 300, "There are several types of roads available to you:");
+        drawstring(Width / 2 - 270, Height - 330, "a motorway, a road with an intersection, a road with several intersections.");
+        drawstring(Width / 2 - 200, Height - 360, "You can simulate an accident in one of the traffic lanes.");
+        drawstring(Width / 2 - 195, Height - 390, "To do this, you need to select one of the bands using");
+        drawstring(Width / 2 - 150, Height - 420, "the arrows on the keyboard (<- and ->).");
+        glColor3ub(239, 211, 52);
+        drawstring(Width / 2 - 180, Height - 450, "The strip you selected will be highlighted in yellow!");
+        glColor3ub(255, 255, 255);
+        drawstring(Width / 2 - 240, Height - 480, "To simulate an accident situation, you need to press the space bar.");
+        drawstring(Width / 2 - 80, Height - 510, "To continue, click next.");
+
         glColor3ub(138, 43, 226);
         glBegin(GL_QUADS);
         glVertex2i(left, bottom + (-7) * delta / 2);
@@ -275,7 +341,7 @@ void processing_buttons(int button)
 
         glColor3ub(255, 255, 255);
         drawstring(Width / 2 - 165, Height - 580, "Back");
-        drawstring(Width / 2, Height - 580, "Continue");
+        drawstring(Width / 2 + 15, Height - 580, "Next");
         menu_activity = false;
         glutSwapBuffers();
     }
@@ -305,10 +371,7 @@ void display()
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
     /* -------------------------- */
-
     menu();
-    //coord_lines();
-
     /* -------------------------- */
     glutSwapBuffers();
 }
@@ -400,6 +463,19 @@ void mouse_pressed(int button, int state, int x, int y)
             if (x <= 285 && x >= 225 && y >= 550 && y <= 600)
             {
                 menu_button_1 = false;
+                glutPostRedisplay();
+            }
+            else if (x <= 575 && x >= 305 && y >= 550 && y <= 600)
+            {
+                menu_button_1 = false;
+                map_choose();
+            }
+        }
+        else if (state == GLUT_DOWN && map_button == true)
+        {
+            if (x <= 575 && x >= 225 && y >= 575 && y <= 625)
+            {
+                map_button = false;
                 glutPostRedisplay();
             }
         }
