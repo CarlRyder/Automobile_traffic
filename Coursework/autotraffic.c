@@ -5,6 +5,9 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <time.h>
+#include <windows.h>
 #include <GL/glut.h>
 
 #define WINDOW_NAME "Car Traffic Simulator"
@@ -14,6 +17,8 @@
 #define BUTTON_HEIGHT 50
 #define MINI_BUTTON_WIDTH 70
 #define MINI_BUTTON_HEIGHT 20
+#define CAR_HEIGHT 50
+#define CAR_WIDTH 30
 
 // COLORS
 #define COLOR_MENU_RED 0.102
@@ -27,6 +32,7 @@ bool menu_button_2 = false;
 bool menu_button_1 = false;
 bool menu_changes_2 = false;
 bool map_button = false;
+bool model_active = false;
 
 struct menu_button
 {
@@ -40,6 +46,14 @@ struct settings
     int count_lanes;
     bool autosave;
 } settings;
+
+typedef struct
+{
+    float x[2];
+    float y[2];
+    int line;
+    int color[3];
+} Tcar;
 
 void drawstring(float x, float y, char* string)
 {
@@ -61,32 +75,183 @@ void coord_lines()
     glEnd();
 }
 
-void get_BMP()
+//void draw_map()
+//{
+//    int x_start = 0;
+//    int y_start = 800;
+//    int i = 0;
+//    while (i < Width * Height * 3)
+//    {
+//        glColor3ub(data[i], data[i + 1], data[i + 2]);
+//        glPointSize(1);
+//        glBegin(GL_POINTS);
+//        glVertex2i(x_start, y_start);
+//        glEnd();
+//        x_start++;
+//        if (x_start >= 800)
+//        {
+//            y_start--;
+//            x_start = 0;
+//        }
+//        i += 3;
+//    }
+//}
+//
+//void get_bmp(char* filename)
+//{
+//    unsigned char RGB[3] = { 0 };
+//    FILE* file = fopen(filename, "rb");
+//    fseek(file, 54, 0);
+//    fread(data, Width * Height * 3, sizeof(unsigned char), file);
+//    fclose(file);
+//}
+
+void draw_newmap()
 {
-    glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
-    glClear(GL_COLOR_BUFFER_BIT);
-    unsigned char RGB[3] = { 0 };
-    FILE* file = fopen("Texture.bmp", "rb");
-    int x_start = 0;
-    int y_start = 800;
-    fseek(file, 54, 0);
-    while (!feof(file))
-    {
-        fread(&RGB, sizeof(unsigned char), 3, file);
-        glColor3ub(RGB[0], RGB[1], RGB[2]);
-        glPointSize(1);
-        glBegin(GL_POINTS);
-        glVertex2i(x_start, y_start);
-        glEnd();
-        memset(RGB, 0, sizeof(RGB));
-        x_start++;
-        if (x_start >= 800)
-        {
-            y_start--;
-            x_start = 0;
-        }
-    }
+    // Grass
+    glColor3ub(34, 139, 34);
+    glBegin(GL_QUADS);
+    glVertex2i(0, 0);
+    glVertex2i(0, 800);
+    glVertex2i(800, 800);
+    glVertex2i(800, 0);
+    glEnd();
+    // Road
+    glColor3ub(70, 68, 81);
+    glBegin(GL_QUADS);
+    glVertex2i(250, 0);
+    glVertex2i(250, 800);
+    glVertex2i(550, 800);
+    glVertex2i(550, 0);
+    glEnd();
+    // Road lines
+    glColor3ub(255, 255, 255);
+    glEnable(GL_LINE_STIPPLE);
+    glLineStipple(2, 0X00FF);
+    glBegin(GL_LINES);
+    glVertex2i(300, 4);
+    glVertex2i(300, 800);
+    glVertex2i(350, 4);
+    glVertex2i(350, 800);
+    glVertex2i(450, 4);
+    glVertex2i(450, 800);
+    glVertex2i(500, 4);
+    glVertex2i(500, 800);
+    glEnd();
+    glDisable(GL_LINE_STIPPLE);
+
+    glBegin(GL_LINES);
+    glVertex2i(250, 0);
+    glVertex2i(250, 800);
+    glVertex2i(400, 0);
+    glVertex2i(400, 800);
+    glVertex2i(550, 0);
+    glVertex2i(550, 800);
+    glEnd();
+}
+
+void pause()
+{
+    draw_newmap();
+    glColor3ub(255, 255, 255);
+    drawstring(Width / 2 - 24, Height - 300, "PAUSE");
     glutSwapBuffers();
+}
+
+void mouse_pressed(int button, int state, int x, int y);
+void keyboard(unsigned char key, int x, int y);
+
+void draw_car(Tcar* car)
+{
+    draw_newmap();
+    glColor3ub(car->color[0], car->color[1], car->color[2]);
+    glBegin(GL_QUADS);
+    glVertex2f(car->x[0], car->y[0]);
+    glVertex2f(car->x[0], car->y[0] + CAR_HEIGHT);
+    glVertex2f(car->x[0] + CAR_WIDTH, car->y[0] + CAR_HEIGHT);
+    glVertex2f(car->x[0] + CAR_WIDTH, car->y[0]);
+    glEnd();
+    glutMouseFunc(mouse_pressed);
+    glutKeyboardFunc(keyboard);
+    glutSwapBuffers();
+}
+
+void init_car(Tcar* car)
+{
+    srand(time(NULL));
+    car->line = rand() % 3 + 1;
+    if (car->line == 1)
+    {
+        car->x[0] = 410;
+        car->y[0] = 0;
+    }
+    else if (car->line == 2)
+    {
+        car->x[0] = 460;
+        car->y[0] = 0;
+    }
+    else if (car->line == 3)
+    {
+        car->x[0] = 510;
+        car->y[0] = 0;
+    }
+    for (int i = 0; i < 3; i++) car->color[i] = rand() % 255;
+}
+
+int x_pos = 416;
+int y_pos = 0;
+
+void timer(int value)
+{
+    if (model_active == true && y_pos < 820)
+    {
+        printf("%d\n", y_pos);
+        y_pos += 5;
+    }
+    else y_pos = 0;
+    glutTimerFunc(1000 / 60, timer, 0);
+}
+
+int car_pos(Tcar* car)
+{
+    if (car->y[0] < 810)
+    {
+        draw_car(car);
+        car->y[0] = y_pos;
+        return 1;
+    }
+    else return 0;
+}
+
+void motorway()
+{
+    if (model_active == true)
+    {
+        glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+        draw_newmap();
+        glutSwapBuffers();
+
+        time_t start = 0, end = 0;
+        Tcar car;
+        init_car(&car);
+        //car_pos(&car);
+        while (car.y[0] < 820)
+        {
+            draw_car(&car);
+            car.y[0] += 0.05;
+        }
+
+        /*start = time(NULL);
+        double diff = 0;
+        do
+        {
+            end = time(NULL);
+            diff = difftime(end, start);
+        } while (diff < 3);*/
+    }
+
+    glutIdleFunc(motorway);
 }
 
 void menu_buttons(struct menu_button* button, int h)
@@ -370,7 +535,7 @@ void display()
 {
     glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
     glClear(GL_COLOR_BUFFER_BIT);
-    glLoadIdentity();
+    //glLoadIdentity();
     /* -------------------------- */
     menu();
     /* -------------------------- */
@@ -426,37 +591,37 @@ void mouse_pressed(int button, int state, int x, int y)
             else if (x <= 470 && x >= 400 && y >= 345 && y <= 365)
             {
                 settings.interval = 3;
-                glutPostRedisplay();
+                processing_buttons(2);
             }
             else if (x <= 560 && x >= 490 && y >= 345 && y <= 365)
             {
                 settings.interval = 5;
-                glutPostRedisplay();
+                processing_buttons(2);
             }
             else if (x <= 640 && x >= 580 && y >= 345 && y <= 365)
             {
                 settings.interval = 7;
-                glutPostRedisplay();
+                processing_buttons(2);
             }
             else if (x <= 470 && x >= 400 && y >= 375 && y <= 395)
             {
                 settings.count_lanes = 2;
-                glutPostRedisplay();
+                processing_buttons(2);
             }
             else if (x <= 560 && x >= 490 && y >= 375 && y <= 395)
             {
                 settings.count_lanes = 3;
-                glutPostRedisplay();
+                processing_buttons(2);
             }
             else if (x <= 470 && x >= 400 && y >= 405 && y <= 425)
             {
                 settings.autosave = true;
-                glutPostRedisplay();
+                processing_buttons(2);
             }
             else if (x <= 560 && x >= 490 && y >= 405 && y <= 425)
             {
                 settings.autosave = false;
-                glutPostRedisplay();
+                processing_buttons(2);
             }
         }
         else if (state == GLUT_DOWN && menu_button_1 == true)
@@ -469,8 +634,7 @@ void mouse_pressed(int button, int state, int x, int y)
             else if (x <= 575 && x >= 305 && y >= 550 && y <= 600)
             {
                 menu_button_1 = false;
-                get_BMP();
-                //map_choose();
+                map_choose();
             }
         }
         else if (state == GLUT_DOWN && map_button == true)
@@ -479,6 +643,12 @@ void mouse_pressed(int button, int state, int x, int y)
             {
                 map_button = false;
                 glutPostRedisplay();
+            }
+            else if (x <= 575 && x >= 225 && y >= 275 && y <= 325)
+            {
+                map_button = false;
+                model_active = true;
+                motorway();
             }
         }
         break;
@@ -490,8 +660,18 @@ void mouse_pressed(int button, int state, int x, int y)
 void keyboard(unsigned char key, int x, int y)
 {
     #define ESCAPE '\033'
-    if (key == ESCAPE)
-        exit(0);
+    if (key == 27 && model_active == true)
+    {
+        model_active = false;
+        printf("escapeescapeescapeescapeescape\n");
+        pause();
+    }
+    else if (key == 27 && model_active == false)
+    {
+        model_active = true;
+        printf("escapeescapeescapeescapeescape\n");
+        motorway();
+    }
 }
 
 void struct_init()
@@ -511,6 +691,8 @@ int main(int argc, char* argv[])
 
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
+    //glutTimerFunc(0, timer, 0);
+
     glutPassiveMotionFunc(mouse_move);
     glutMouseFunc(mouse_pressed);
     glutKeyboardFunc(keyboard);
