@@ -40,6 +40,7 @@ bool menu_button_1 = false;
 bool menu_changes_2 = false;
 bool map_button = false;
 bool model_active = false;
+bool space_done = false;
 
 struct menu_button
 {
@@ -56,6 +57,7 @@ struct settings
 
 typedef struct
 {
+    int direction;
     float x[2];
     float y[2];
     int line;
@@ -66,7 +68,7 @@ typedef struct
 typedef struct
 {
     int car_counts;
-    Tcar* cars[64];
+    Tcar* cars[64]; // 1 - 2 - 3 - 4 - 5
     int model_time;
 } Map;
 
@@ -176,32 +178,54 @@ void map_show(int value)
     glDisable(GL_TEXTURE_2D);
 }
 
-void car_show(Tcar* car)
+void drawstring(float x, float y, char* string)
+{
+    glRasterPos2i(x, y);
+    for (char* c = string; *c != '\0'; c++)
+    {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+    }
+}
+
+void pause()
 {
     map_show(0);
+    glColor3ub(255, 255, 255);
+    drawstring(Width / 2 - 24, Height - 300, "PAUSE");
+    glutSwapBuffers();
+}
+
+void car_draw(Tcar* car)
+{
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, car_tex.texture[car->texture_id]);
     glColor3f(1, 1, 1);
-
     glBegin(GL_QUADS);
-    glTexCoord2f(0, 1); glVertex2f(car->x[0], car->y[0] + CAR_HEIGHT); //LV
-    glTexCoord2f(1, 1); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0] + CAR_HEIGHT); //RV
-    glTexCoord2f(1, 0); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0]); //RN
-    glTexCoord2f(0, 0); glVertex2f(car->x[0], car->y[0]); //LN
+    if (car->direction == 1)
+    {
+        glTexCoord2f(0, 1); glVertex2f(car->x[0], car->y[0] + CAR_HEIGHT); //LV
+        glTexCoord2f(1, 1); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0] + CAR_HEIGHT); //RV
+        glTexCoord2f(1, 0); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0]); //RN
+        glTexCoord2f(0, 0); glVertex2f(car->x[0], car->y[0]); //LN
+    }
+    else if (car->direction == 2)
+    {
+        glTexCoord2f(1, 0); glVertex2f(car->x[0], car->y[0] + CAR_HEIGHT); //LV
+        glTexCoord2f(0, 0); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0] + CAR_HEIGHT); //RV
+        glTexCoord2f(0, 1); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0]); //RN
+        glTexCoord2f(1, 1); glVertex2f(car->x[0], car->y[0]); //LN
+    }
     glEnd();
-
-    glutSwapBuffers();
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_TEXTURE_2D);
 }
 
-void drawstring(float x, float y, char* string)
+void cars_show(Tcar* car1, Tcar* car2)
 {
-    glRasterPos2i(x, y);
-    for (char* c = string; *c != '\0'; c++) 
-    {
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
-    }
+    map_show(0);
+    car_draw(car1);
+    car_draw(car2);
+    glutSwapBuffers();
 }
 
 void coord_lines()
@@ -215,64 +239,64 @@ void coord_lines()
     glEnd();
 }
 
-void pause()
-{
-    map_show(0);
-    glColor3ub(255, 255, 255);
-    drawstring(Width / 2 - 24, Height - 300, "PAUSE");
-    glutSwapBuffers();
-}
-
 void init_car(Tcar* car)
 {
-    srand(time(NULL));
-    car->line = rand() % 6 + 1;
-    if (car->line == 1) 
+    car->line = rand() % 3 + 1;
+    if (car->direction == 1)
     {
-        car->x[0] = 420;
-        car->y[0] = 0;
+        if (car->line == 1)
+        {
+            car->x[0] = 420;
+            car->y[0] = -44;
+        }
+        else if (car->line == 2)
+        {
+            car->x[0] = 468;
+            car->y[0] = -44;
+        }
+        else if (car->line == 3)
+        {
+            car->x[0] = 510;
+            car->y[0] = -44;
+        }
     }
-    else if (car->line == 2)
+    else if (car->direction == 2)
     {
-        car->x[0] = 468;
-        car->y[0] = 0;
-    }
-    else if (car->line == 3)
-    {
-        car->x[0] = 510;
-        car->y[0] = 0;
-    }
-    else if (car->line == 4)
-    {
-        car->x[0] = 285;
-        car->y[0] = 800;
-    }
-    else if (car->line == 5)
-    {
-        car->x[0] = 327;
-        car->y[0] = 800;
-    }
-    else if (car->line == 6)
-    {
-        car->x[0] = 370;
-        car->y[0] = 800;
+        if (car->line == 1)
+        {
+            car->x[0] = 283;
+            car->y[0] = 844;
+        }
+        else if (car->line == 2)
+        {
+            car->x[0] = 330;
+            car->y[0] = 844;
+        }
+        else if (car->line == 3)
+        {
+            car->x[0] = 373;
+            car->y[0] = 844;
+        }
     }
     car->texture_id = rand() % 19;
 }
 
-// Temp
-int x_pos = 416;
-int y_pos = 0;
-
-void timer(int value)
+void cars_driving()
 {
-    if (model_active == true && y_pos < 820)
+    /*timer(0, car1, car2);*/
+    srand(time(NULL));
+    time_t start = 0, end = 0;
+    Tcar car1, car2;
+    car1.direction = 1;
+    init_car(&car1);
+    car2.direction = 2;
+    init_car(&car2);
+    while (car1.y[0] < 844 && car2.y[0] > -44)
     {
-        printf("%d\n", y_pos);
-        y_pos += 5;
+        cars_show(&car1, &car2);
+        car1.y[0] += 0.05;
+        car2.y[0] -= 0.05;
     }
-    else y_pos = 0;
-    glutTimerFunc(1000 / 60, timer, 0);
 }
 
 void motorway()
@@ -283,14 +307,26 @@ void motorway()
         glClear(GL_COLOR_BUFFER_BIT);
         map_show(0);
         glutSwapBuffers();
+        //cars_driving();
 
+        srand(time(NULL));
         time_t start = 0, end = 0;
         Tcar car1, car2;
+        car1.direction = 1;
         init_car(&car1);
-        while (car1.y[0] < 820)
+        car2.direction = 2;
+        init_car(&car2);
+        
+        while (car1.y[0] < 844 && car2.y[0] > -44)
         {
-            car_show(&car1);
-            car1.y[0] += 0.08;
+            if (GetAsyncKeyState(VK_SPACE))
+            {
+                space_done = true;
+                pause();
+            }
+            cars_show(&car1, &car2);
+            car1.y[0] += 0.05;
+            car2.y[0] -= 0.05;
         }
         /*start = time(NULL);
         double diff = 0;
@@ -711,6 +747,20 @@ void keyboard(unsigned char key, int x, int y)
         printf("escapeescapeescapeescapeescape\n");
         motorway();
     }
+    //else if (key == 32 && model_active == true)
+    //{
+    //    space_done = true;
+    //    model_active = false;
+    //    printf("SPACE\n");
+    //    //pause();
+    //}
+    //else if (key == 32 && model_active == false)
+    //{
+    //    space_done = false;
+    //    model_active = true;
+    //    printf("SPACE\n");
+    //    motorway();
+    //}
 }
 
 void struct_init()
