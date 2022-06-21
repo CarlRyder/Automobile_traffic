@@ -10,6 +10,7 @@
 #include <windows.h>
 #include <GL/glut.h>
 
+#define DEFAULT_ERROR -1
 #define WINDOW_NAME "Car Traffic Simulator"
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 800
@@ -17,8 +18,14 @@
 #define BUTTON_HEIGHT 50
 #define MINI_BUTTON_WIDTH 70
 #define MINI_BUTTON_HEIGHT 20
-#define CAR_HEIGHT 50
-#define CAR_WIDTH 30
+#define CAR_HEIGHT 44
+#define CAR_WIDTH 24
+
+// TEXTURES
+#define MAP_ONE "map_texture/motorway_1.txt"
+#define MAP_TWO "map_texture/crossroad_2.txt"
+#define MAP_TREE "map_texture/mult_crossroad_3.txt"
+#define TOTAL_CARS 20
 
 // COLORS
 #define COLOR_MENU_RED 0.102
@@ -52,8 +59,141 @@ typedef struct
     float x[2];
     float y[2];
     int line;
-    int color[3];
+    int texture_id;
+    int speed;
 } Tcar;
+
+typedef struct
+{
+    int car_counts;
+    Tcar* cars[64];
+    int model_time;
+} Map;
+
+struct tex
+{
+    unsigned int texture[20];
+}car_tex, map_tex;
+
+void error()
+{
+    printf(" ");
+    exit(DEFAULT_ERROR);
+}
+
+void get_car_texture()
+{
+    int car_count = 0, first_digit = 16, second_digit = 17;
+    char path_pattern[] = "car_texture/car_00.txt";
+    while (car_count < TOTAL_CARS)
+    {
+        car_count++;
+        path_pattern[second_digit]++;
+        if (car_count == 10)
+        {
+            path_pattern[first_digit] = '1';
+            path_pattern[second_digit] = '0';
+        }
+        if (car_count == 20)
+        {
+            path_pattern[first_digit] = '2';
+            path_pattern[second_digit] = '0';
+        }
+        int width = 24, height = 44, num_color = 3;
+        unsigned char* data = (unsigned char*)malloc(width * height * num_color);
+        if (data != NULL)
+        {
+            FILE* texture_file = fopen(path_pattern, "rb");
+            int i = 0;
+            unsigned char str[2] = { 0 };
+            while (i < width * height * num_color)
+            {
+                fgets(str, 2, texture_file);
+                data[i] = str[0];
+                i++;
+            }
+            fclose(texture_file);
+            glGenTextures(1, &car_tex.texture[car_count - 1]);
+            glBindTexture(GL_TEXTURE_2D, car_tex.texture[car_count - 1]);
+            glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+            free(data);
+        }
+    }
+}
+
+GLuint get_map_texture(char* filename)
+{
+    GLuint texture = 0;
+    int width = 800, height = 800, num_color = 3;
+    unsigned char* data = (unsigned char*)malloc(width * height * num_color * sizeof(unsigned char));
+    if (data != NULL)
+    {
+        FILE* texture_file = fopen(filename, "rb");
+        int i = 0;
+        unsigned char str[2] = { 0 };
+        while (i < width * height * num_color)
+        {
+            fgets(str, 2, texture_file);
+            data[i] = str[0];
+            i++;
+        }
+        fclose(texture_file);
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+        free(data);
+        return texture;
+    }
+    else
+    {
+        error();
+        return DEFAULT_ERROR;
+    }
+}
+
+void map_show(int value)
+{
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, map_tex.texture[value]);
+    glColor3f(1, 1, 1);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 1); glVertex2f(0, 800); // LV
+    glTexCoord2f(1, 1); glVertex2f(800, 800); // RV
+    glTexCoord2f(1, 0); glVertex2f(800, 0); // RN
+    glTexCoord2f(0, 0); glVertex2f(0, 0); // LN
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+}
+
+void car_show(Tcar* car)
+{
+    map_show(0);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, car_tex.texture[car->texture_id]);
+    glColor3f(1, 1, 1);
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 1); glVertex2f(car->x[0], car->y[0] + CAR_HEIGHT); //LV
+    glTexCoord2f(1, 1); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0] + CAR_HEIGHT); //RV
+    glTexCoord2f(1, 0); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0]); //RN
+    glTexCoord2f(0, 0); glVertex2f(car->x[0], car->y[0]); //LN
+    glEnd();
+
+    glutSwapBuffers();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
+}
 
 void drawstring(float x, float y, char* string)
 {
@@ -68,126 +208,33 @@ void coord_lines()
 {
     glColor3ub(255, 255, 255);
     glBegin(GL_LINES);
-    glVertex2i(400, 0);
-    glVertex2i(400, 800);
-    glVertex2i(0, 400);
+    glVertex2i(400, 0); 
+    glVertex2i(400, 800); 
+    glVertex2i(0, 400); 
     glVertex2i(800, 400);
-    glEnd();
-}
-
-//void draw_map()
-//{
-//    int x_start = 0;
-//    int y_start = 800;
-//    int i = 0;
-//    while (i < Width * Height * 3)
-//    {
-//        glColor3ub(data[i], data[i + 1], data[i + 2]);
-//        glPointSize(1);
-//        glBegin(GL_POINTS);
-//        glVertex2i(x_start, y_start);
-//        glEnd();
-//        x_start++;
-//        if (x_start >= 800)
-//        {
-//            y_start--;
-//            x_start = 0;
-//        }
-//        i += 3;
-//    }
-//}
-//
-//void get_bmp(char* filename)
-//{
-//    unsigned char RGB[3] = { 0 };
-//    FILE* file = fopen(filename, "rb");
-//    fseek(file, 54, 0);
-//    fread(data, Width * Height * 3, sizeof(unsigned char), file);
-//    fclose(file);
-//}
-
-void draw_newmap()
-{
-    // Grass
-    glColor3ub(34, 139, 34);
-    glBegin(GL_QUADS);
-    glVertex2i(0, 0);
-    glVertex2i(0, 800);
-    glVertex2i(800, 800);
-    glVertex2i(800, 0);
-    glEnd();
-    // Road
-    glColor3ub(70, 68, 81);
-    glBegin(GL_QUADS);
-    glVertex2i(250, 0);
-    glVertex2i(250, 800);
-    glVertex2i(550, 800);
-    glVertex2i(550, 0);
-    glEnd();
-    // Road lines
-    glColor3ub(255, 255, 255);
-    glEnable(GL_LINE_STIPPLE);
-    glLineStipple(2, 0X00FF);
-    glBegin(GL_LINES);
-    glVertex2i(300, 4);
-    glVertex2i(300, 800);
-    glVertex2i(350, 4);
-    glVertex2i(350, 800);
-    glVertex2i(450, 4);
-    glVertex2i(450, 800);
-    glVertex2i(500, 4);
-    glVertex2i(500, 800);
-    glEnd();
-    glDisable(GL_LINE_STIPPLE);
-
-    glBegin(GL_LINES);
-    glVertex2i(250, 0);
-    glVertex2i(250, 800);
-    glVertex2i(400, 0);
-    glVertex2i(400, 800);
-    glVertex2i(550, 0);
-    glVertex2i(550, 800);
     glEnd();
 }
 
 void pause()
 {
-    draw_newmap();
+    map_show(0);
     glColor3ub(255, 255, 255);
     drawstring(Width / 2 - 24, Height - 300, "PAUSE");
-    glutSwapBuffers();
-}
-
-void mouse_pressed(int button, int state, int x, int y);
-void keyboard(unsigned char key, int x, int y);
-
-void draw_car(Tcar* car)
-{
-    draw_newmap();
-    glColor3ub(car->color[0], car->color[1], car->color[2]);
-    glBegin(GL_QUADS);
-    glVertex2f(car->x[0], car->y[0]);
-    glVertex2f(car->x[0], car->y[0] + CAR_HEIGHT);
-    glVertex2f(car->x[0] + CAR_WIDTH, car->y[0] + CAR_HEIGHT);
-    glVertex2f(car->x[0] + CAR_WIDTH, car->y[0]);
-    glEnd();
-    glutMouseFunc(mouse_pressed);
-    glutKeyboardFunc(keyboard);
     glutSwapBuffers();
 }
 
 void init_car(Tcar* car)
 {
     srand(time(NULL));
-    car->line = rand() % 3 + 1;
-    if (car->line == 1)
+    car->line = rand() % 6 + 1;
+    if (car->line == 1) 
     {
-        car->x[0] = 410;
+        car->x[0] = 420;
         car->y[0] = 0;
     }
     else if (car->line == 2)
     {
-        car->x[0] = 460;
+        car->x[0] = 468;
         car->y[0] = 0;
     }
     else if (car->line == 3)
@@ -195,9 +242,25 @@ void init_car(Tcar* car)
         car->x[0] = 510;
         car->y[0] = 0;
     }
-    for (int i = 0; i < 3; i++) car->color[i] = rand() % 255;
+    else if (car->line == 4)
+    {
+        car->x[0] = 285;
+        car->y[0] = 800;
+    }
+    else if (car->line == 5)
+    {
+        car->x[0] = 327;
+        car->y[0] = 800;
+    }
+    else if (car->line == 6)
+    {
+        car->x[0] = 370;
+        car->y[0] = 800;
+    }
+    car->texture_id = rand() % 19;
 }
 
+// Temp
 int x_pos = 416;
 int y_pos = 0;
 
@@ -212,36 +275,23 @@ void timer(int value)
     glutTimerFunc(1000 / 60, timer, 0);
 }
 
-int car_pos(Tcar* car)
-{
-    if (car->y[0] < 810)
-    {
-        draw_car(car);
-        car->y[0] = y_pos;
-        return 1;
-    }
-    else return 0;
-}
-
 void motorway()
 {
     if (model_active == true)
     {
         glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
         glClear(GL_COLOR_BUFFER_BIT);
-        draw_newmap();
+        map_show(0);
         glutSwapBuffers();
 
         time_t start = 0, end = 0;
-        Tcar car;
-        init_car(&car);
-        //car_pos(&car);
-        while (car.y[0] < 820)
+        Tcar car1, car2;
+        init_car(&car1);
+        while (car1.y[0] < 820)
         {
-            draw_car(&car);
-            car.y[0] += 0.05;
+            car_show(&car1);
+            car1.y[0] += 0.08;
         }
-
         /*start = time(NULL);
         double diff = 0;
         do
@@ -250,7 +300,6 @@ void motorway()
             diff = difftime(end, start);
         } while (diff < 3);*/
     }
-
     glutIdleFunc(motorway);
 }
 
@@ -292,7 +341,6 @@ void map_choose()
     glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3ub(255, 255, 255);
-    //coord_lines();
     drawstring(Width / 2 - 95, Height - 200, "AUTOMOBILE TRAFFIC");
     menu_buttons(NULL, 7);
     menu_buttons(NULL, 4);
@@ -303,7 +351,7 @@ void map_choose()
     drawstring(Width / 2 - 40, Height - 305, "Motorway");
     drawstring(Width / 2 - 100, Height - 380, "Road with an intersection");
     drawstring(Width / 2 - 120, Height - 455, "Road with several intersections");
-    drawstring(Width / 2 - 20, Height - 605, "Back"); // motorway, road with an intersection, road with several intersections
+    drawstring(Width / 2 - 20, Height - 605, "Back");
     menu_activity = false;
     glutSwapBuffers();
 }
@@ -446,7 +494,6 @@ void processing_buttons(int button)
         glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
         glClear(GL_COLOR_BUFFER_BIT);
         glColor3ub(255, 255, 255);
-        //coord_lines();
         drawstring(Width / 2 - 115, Height - 200, "CAR TRAFFIC SIMULATOR");
         drawstring(Width / 2 - 37, Height - 300, "Settings:");
         drawstring(Width / 10 - 34, Height - 360, "Spawn interval of machines (seconds):");
@@ -476,7 +523,6 @@ void processing_buttons(int button)
         glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
         glClear(GL_COLOR_BUFFER_BIT);
         glColor3ub(255, 255, 255);
-        //coord_lines();
         drawstring(Width / 2 - 95, Height - 200, "AUTOMOBILE TRAFFIC");
         drawstring(Width / 2 - 200, Height - 270, "Good afternoon! A Car Traffic Simulator welcomes you.");
         drawstring(Width / 2 - 180, Height - 300, "There are several types of roads available to you:");
@@ -535,13 +581,11 @@ void display()
 {
     glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
     glClear(GL_COLOR_BUFFER_BIT);
-    //glLoadIdentity();
-    /* -------------------------- */
     menu();
-    /* -------------------------- */
     glutSwapBuffers();
 }
 
+// Need fix
 void reshape(GLint w, GLint h)
 {
     Width = w;
@@ -552,11 +596,6 @@ void reshape(GLint w, GLint h)
     glOrtho(0, w, 0, h, -1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-}
-
-void mouse_move(int ax, int ay)
-{
-    //glutSetWindowTitle("MOVE");
 }
 
 void mouse_pressed(int button, int state, int x, int y)
@@ -676,6 +715,8 @@ void keyboard(unsigned char key, int x, int y)
 
 void struct_init()
 {
+    map_tex.texture[0] = get_map_texture(MAP_ONE);
+    get_car_texture();
     settings.interval = 5;
     settings.autosave = false;
     settings.count_lanes = 3;
@@ -693,7 +734,6 @@ int main(int argc, char* argv[])
     glutReshapeFunc(reshape);
     //glutTimerFunc(0, timer, 0);
 
-    glutPassiveMotionFunc(mouse_move);
     glutMouseFunc(mouse_pressed);
     glutKeyboardFunc(keyboard);
 

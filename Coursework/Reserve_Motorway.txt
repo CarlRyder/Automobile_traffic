@@ -1,0 +1,57 @@
+void draw_newmap()
+{
+    // Grass
+    glColor3ub(34, 139, 34);
+    glBegin(GL_QUADS);
+    glVertex2i(0, 0);
+    glVertex2i(0, 800);
+    glVertex2i(800, 800);
+    glVertex2i(800, 0);
+    glEnd();
+    // Road
+    glColor3ub(70, 68, 81);
+    glBegin(GL_QUADS);
+    glVertex2i(250, 0);
+    glVertex2i(250, 800);
+    glVertex2i(550, 800);
+    glVertex2i(550, 0);
+    glEnd();
+    // Road lines
+    glColor3ub(255, 255, 255);
+    glEnable(GL_LINE_STIPPLE);
+    glLineStipple(2, 0X00FF);
+    glBegin(GL_LINES);
+    glVertex2i(300, 4);
+    glVertex2i(300, 800);
+    glVertex2i(350, 4);
+    glVertex2i(350, 800);
+    glVertex2i(450, 4);
+    glVertex2i(450, 800);
+    glVertex2i(500, 4);
+    glVertex2i(500, 800);
+    glEnd();
+    glDisable(GL_LINE_STIPPLE);
+
+    glBegin(GL_LINES);
+    glVertex2i(250, 0);
+    glVertex2i(250, 800);
+    glVertex2i(400, 0);
+    glVertex2i(400, 800);
+    glVertex2i(550, 0);
+    glVertex2i(550, 800);
+    glEnd();
+}
+
+void draw_car(Tcar* car)
+{
+    //draw_newmap();
+    map_show(0);
+    //glColor3ub(car->color[0], car->color[1], car->color[2]);
+    glBegin(GL_QUADS);
+    glVertex2f(car->x[0], car->y[0]);
+    glVertex2f(car->x[0], car->y[0] + CAR_HEIGHT);
+    glVertex2f(car->x[0] + CAR_WIDTH, car->y[0] + CAR_HEIGHT);
+    glVertex2f(car->x[0] + CAR_WIDTH, car->y[0]);
+    glEnd();
+    glutSwapBuffers();
+}
