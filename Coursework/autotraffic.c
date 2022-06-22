@@ -423,7 +423,11 @@ Cars* create()
         tmp->next_car = NULL;
         return tmp;
     }
-    else error();
+    else
+    {
+        error();
+        return NULL;
+    }
 }
 
 void motorway()
