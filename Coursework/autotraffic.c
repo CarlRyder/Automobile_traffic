@@ -95,14 +95,15 @@ void car_coords(Tcar* car, int x, int y);
 void coord_lines();
 void init_car(Tcar* car);
 void car_drive(Tcar* car);
-Cars* remove_element(int data, Cars* head);
-void add_car_end(Cars* head);
-Cars* create();
-void check_cars(Cars* head);
 
-void motorway_copy();
+void check_cars(Cars* head);
+void push_car(Cars* head);
+void delete_car(int number, Cars* head);
+Cars* create_car();
+
+//void motorway_copy();
 void motorway();
-void timer(int value);
+//void timer(int value);
 void crossroad();
 void mult_crossroad();
 void menu_buttons(struct menu_button* button, int h);
@@ -336,15 +337,31 @@ void car_draw(Tcar* car)
     glDisable(GL_TEXTURE_2D);
 }
 
+bool done = false;
+
 void cars_show(Cars* head)
 {
     map_show(0);
     Cars* tmp = head;
-    while (tmp->next_car != NULL)
+    while (tmp != NULL)
     {
         car_draw(&tmp->car);
+        if (tmp->car.direction == 1)
+        {
+            if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 1000;
+        }
+        else if (tmp->car.direction == 2)
+        {
+            if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 1000;
+        }
         tmp = tmp->next_car;
     }
+    /*while (tmp != NULL)
+    {
+        if ((tmp->car.direction == 1 && tmp->car.y[0] > 800) || (tmp->car.direction == 2 && tmp->car.y[0] < 0)) done = true;
+        else done = false;
+        tmp = tmp->next_car;
+    }*/
     glutSwapBuffers();
     //car_draw(car1);
     //car_draw(car2);
@@ -392,41 +409,6 @@ void car_drive(Tcar* car)
     }
 }
 
-Cars* remove_element(int data, Cars* head)
-{
-    Cars* tmp = head, * ptr = NULL;
-    if (head == NULL) return NULL;
-    while (tmp && tmp->car.num != data)
-    {
-        ptr = tmp;
-        tmp = tmp->next_car;
-    }
-    if (tmp == head)
-    {
-        free(head);
-        return tmp->next_car;
-    }
-    if (!tmp) return head;
-    ptr->next_car = tmp->next_car;
-    free(tmp);
-    return head;
-}
-
-void add_car_end(Cars* head)
-{
-    Cars* tmp = (Cars*)malloc(sizeof(Cars));
-    if (tmp != NULL)
-    {
-        init_car(&tmp->car);
-        tmp->next_car = NULL;
-        Cars* ptr = head;
-        while (ptr->next_car != NULL)
-            ptr = ptr->next_car;
-        ptr->next_car = tmp;
-    }
-    else error();
-}
-
 Cars* create_car()
 {
     Cars* node = (Cars*)malloc(sizeof(Cars));
@@ -443,6 +425,34 @@ Cars* create_car()
     }
 }
 
+void delete_car(int number, Cars* head)
+{
+    Cars* temp = head, * ptr = NULL;
+    if (temp == NULL) return;
+    else
+    {
+        if (temp->next_car == NULL)
+        {
+            free(head);
+            head = NULL;
+            return;
+        }
+        while (temp->car.num != number)
+        {
+            ptr = temp;
+            temp = temp->next_car;
+        }
+        if (temp == head)
+        {
+            head = temp->next_car;
+            return;
+        }
+        if (temp->next_car != NULL && ptr != NULL) ptr->next_car = temp->next_car;
+        else if (ptr != NULL) ptr->next_car = NULL;
+        free(temp);
+    }
+}
+
 void push_car(Cars* head)
 {
     Cars* new_node = create_car();
@@ -456,14 +466,14 @@ void check_cars(Cars* head)
     Cars* tmp = head;
     while (tmp->next_car != NULL)
     {
-        if (tmp->car.direction == 1 && tmp->car.y[0] > 820)
+        if (tmp->car.direction == 1 && tmp->car.y[0] > 840)
         {
-            remove_element(tmp->car.num, head);
+            delete_car(tmp->car.num, head);
             Map.car_counts--;
         }
-        else if (tmp->car.direction == 2 && tmp->car.y[0] < -20)
+        else if (tmp->car.direction == 2 && tmp->car.y[0] < -40)
         {
-            remove_element(tmp->car.num, head);
+            delete_car(tmp->car.num, head);
             Map.car_counts--;
         }
         tmp = tmp->next_car;
@@ -472,17 +482,17 @@ void check_cars(Cars* head)
 
 Cars* head = NULL;
 
-void motorway_copy()
-{
-    add_car_end(head);
-    check_cars(head);
-}
-
-void timer(int value)
-{
-    add_car_end(head);
-    glutTimerFunc(2000, timer, 0);
-}
+//void motorway_copy()
+//{
+//    add_car_end(head);
+//    check_cars(head);
+//}
+//
+//void timer(int value)
+//{
+//    add_car_end(head);
+//    glutTimerFunc(2000, timer, 0);
+//}
 
 void motorway()
 {
@@ -495,24 +505,23 @@ void motorway()
         map_show(0);
         glutSwapBuffers();
         srand(time(NULL));
+
         /*time_t start = 0, end = 0;*/
         /*Tcar car1, car2;
         car1.direction = 1;
         init_car(&car1);
         car2.direction = 2;
         init_car(&car2);*/
-        
         /*bool done1 = false, done2 = false;*/
+
         while (true)
         {
-            add_car_end(head);
-            //if (done1 == true && done2 == true) break;
-            if (space_done == true) break;
-            Cars* tmp = head;
-            while (tmp->next_car != NULL)
+            if (head == NULL) head = create_car();
+            else
             {
                 if (space_done == true) break;
-                while ((tmp->car.direction == 1 && tmp->car.y[0] < 844) || (tmp->car.direction == 2 && tmp->car.y[0] > -44))
+                push_car(head);
+                while (done != true)
                 {
                     if (GetAsyncKeyState(VK_SPACE) & 0x1)
                     {
@@ -521,25 +530,10 @@ void motorway()
                         break;
                     }
                     cars_show(head);
-                    if (tmp->car.direction == 1)
-                    {
-                        if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 1000;
-                    }
-                    else if (tmp->car.direction == 2)
-                    {
-                        if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 1000;
-                    }
                 }
-                tmp = tmp->next_car;
                 //check_cars(head);
             }
-            /*if (car1.y[0] < 844) car_drive(&car1);
-            else done1 = true;
-
-            if (car2.y[0] > -44) car_drive(&car2);
-            else done2 = true;*/
         }
-        
         glutIdleFunc(motorway);
     }
     if (space_done == true)
@@ -847,7 +841,6 @@ void display()
     glutSwapBuffers();
 }
 
-// Need fix
 void reshape(GLint w, GLint h)
 {
     Width = w;
