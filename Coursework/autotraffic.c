@@ -348,11 +348,11 @@ void cars_show(Cars* head)
         car_draw(&tmp->car);
         if (tmp->car.direction == 1)
         {
-            if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 1000;
+            if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 3000;
         }
         else if (tmp->car.direction == 2)
         {
-            if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 1000;
+            if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 3000;
         }
         tmp = tmp->next_car;
     }
@@ -482,12 +482,14 @@ void check_cars(Cars* head)
 
 Cars* head = NULL;
 
-//void motorway_copy()
-//{
-//    add_car_end(head);
-//    check_cars(head);
-//}
-//
+void motorway_copy()
+{
+    glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    map_show(0);
+    glutSwapBuffers();
+}
+
 //void timer(int value)
 //{
 //    add_car_end(head);
@@ -500,28 +502,16 @@ void motorway()
     //timer(0);
     if (model_active == true)
     {
-        glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
-        glClear(GL_COLOR_BUFFER_BIT);
-        map_show(0);
-        glutSwapBuffers();
-        srand(time(NULL));
-
-        /*time_t start = 0, end = 0;*/
-        /*Tcar car1, car2;
-        car1.direction = 1;
-        init_car(&car1);
-        car2.direction = 2;
-        init_car(&car2);*/
-        /*bool done1 = false, done2 = false;*/
-
+        motorway_copy();
+        clock_t start = 0, end = 0;
         while (true)
         {
             if (head == NULL) head = create_car();
             else
             {
                 if (space_done == true) break;
-                push_car(head);
-                while (done != true)
+                start = clock();
+                while (1)
                 {
                     if (GetAsyncKeyState(VK_SPACE) & 0x1)
                     {
@@ -529,7 +519,14 @@ void motorway()
                         model_active = false;
                         break;
                     }
+                    if ((end - start) / CLOCKS_PER_SEC > 0.75)
+                    {
+                        push_car(head);
+                        start = clock();
+                        end = 0;
+                    }
                     cars_show(head);
+                    end = clock();
                 }
                 //check_cars(head);
             }
@@ -819,6 +816,7 @@ void menu()
 {
     struct menu_button first_button, second_button, third_button, fourth_button;
     // Drawing menu buttons
+    srand(time(NULL));
     menu_buttons(&first_button, 4);
     menu_buttons(&second_button, 1);
     menu_buttons(&third_button, -2);
