@@ -343,6 +343,7 @@ void cars_show(Cars* head)
     while (tmp->next_car != NULL)
     {
         car_draw(&tmp->car);
+        tmp = tmp->next_car;
     }
     glutSwapBuffers();
     //car_draw(car1);
@@ -359,8 +360,9 @@ void car_coords(Tcar* car, int x, int y)
 
 void init_car(Tcar* car)
 {
-    car->line = Map.car_counts + 1;
+    car->num = Map.car_counts + 1;
     Map.car_counts++;
+    car->direction = rand() % 2 + 1;
     car->line = rand() % 3 + 1;
     car->speed = rand() % 90 + 40;
     if (car->direction == 1)
@@ -371,9 +373,9 @@ void init_car(Tcar* car)
     }
     else if (car->direction == 2)
     {
-        if (car->line == 1) car_coords(car, 283, 944);
-        else if (car->line == 2) car_coords(car, 330, 944);
-        else if (car->line == 3) car_coords(car, 373, 944);
+        if (car->line == 1) car_coords(car, 283, 844);
+        else if (car->line == 2) car_coords(car, 330, 844);
+        else if (car->line == 3) car_coords(car, 373, 844);
     }
     car->texture_id = rand() % 19;
 }
@@ -415,7 +417,6 @@ void add_car_end(Cars* head)
     Cars* tmp = (Cars*)malloc(sizeof(Cars));
     if (tmp != NULL)
     {
-        tmp->car.direction = rand() % 2 + 1;
         init_car(&tmp->car);
         tmp->next_car = NULL;
         Cars* ptr = head;
@@ -426,15 +427,14 @@ void add_car_end(Cars* head)
     else error();
 }
 
-Cars* create()
+Cars* create_car()
 {
-    Cars* tmp = (Cars*)malloc(sizeof(Cars));
-    if (tmp != NULL)
+    Cars* node = (Cars*)malloc(sizeof(Cars));
+    if (node != NULL)
     {
-        tmp->car.direction = rand() % 2 + 1;
-        init_car(&tmp->car);
-        tmp->next_car = NULL;
-        return tmp;
+        init_car(&node->car);
+        node->next_car = NULL;
+        return node;
     }
     else
     {
@@ -443,9 +443,17 @@ Cars* create()
     }
 }
 
+void push_car(Cars* head)
+{
+    Cars* new_node = create_car();
+    Cars* temp = head;
+    while (temp->next_car != NULL) temp = temp->next_car;
+    temp->next_car = new_node;
+}
+
 void check_cars(Cars* head)
 {
-    Cars* tmp = head, * ptr = NULL;
+    Cars* tmp = head;
     while (tmp->next_car != NULL)
     {
         if (tmp->car.direction == 1 && tmp->car.y[0] > 820)
@@ -458,7 +466,6 @@ void check_cars(Cars* head)
             remove_element(tmp->car.num, head);
             Map.car_counts--;
         }
-        ptr = tmp;
         tmp = tmp->next_car;
     }
 }
@@ -474,13 +481,13 @@ void motorway_copy()
 void timer(int value)
 {
     add_car_end(head);
-    glutTimerFunc(1000, timer, 0);
+    glutTimerFunc(2000, timer, 0);
 }
 
 void motorway()
 {
-    head = create();
-    timer(0);
+    head = create_car();
+    //timer(0);
     if (model_active == true)
     {
         glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
@@ -495,20 +502,24 @@ void motorway()
         car2.direction = 2;
         init_car(&car2);*/
         
-        bool done1 = false, done2 = false;
+        /*bool done1 = false, done2 = false;*/
         while (true)
         {
+            add_car_end(head);
             //if (done1 == true && done2 == true) break;
-            if (GetAsyncKeyState(VK_SPACE) & 0x1)
-            {
-                space_done = true;
-                break;
-            }
-            Cars* tmp = head, * ptr;
+            if (space_done == true) break;
+            Cars* tmp = head;
             while (tmp->next_car != NULL)
             {
-                while ((tmp->car.direction == 1 && tmp->car.y[0] < 844) && (tmp->car.direction == 2 && tmp->car.y[0] > -44))
+                if (space_done == true) break;
+                while ((tmp->car.direction == 1 && tmp->car.y[0] < 844) || (tmp->car.direction == 2 && tmp->car.y[0] > -44))
                 {
+                    if (GetAsyncKeyState(VK_SPACE) & 0x1)
+                    {
+                        space_done = true;
+                        model_active = false;
+                        break;
+                    }
                     cars_show(head);
                     if (tmp->car.direction == 1)
                     {
@@ -519,9 +530,8 @@ void motorway()
                         if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 1000;
                     }
                 }
-                ptr = tmp;
                 tmp = tmp->next_car;
-                check_cars(head);
+                //check_cars(head);
             }
             /*if (car1.y[0] < 844) car_drive(&car1);
             else done1 = true;
@@ -534,7 +544,6 @@ void motorway()
     }
     if (space_done == true)
     {
-        model_active = false;
         change_line();
     }
 }
