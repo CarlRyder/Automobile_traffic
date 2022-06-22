@@ -90,11 +90,19 @@ void drawstring(float x, float y, char* string);
 void control_lines(int line);
 void change_line();
 void car_draw(Tcar* car);
-void cars_show(Tcar* car1, Tcar* car2);
+void cars_show(Cars* head);
 void car_coords(Tcar* car, int x, int y);
 void coord_lines();
 void init_car(Tcar* car);
+void car_drive(Tcar* car);
+Cars* remove_element(int data, Cars* head);
+void add_car_end(Cars* head);
+Cars* create();
+void check_cars(Cars* head);
+
+void motorway_copy();
 void motorway();
+void timer(int value);
 void crossroad();
 void mult_crossroad();
 void menu_buttons(struct menu_button* button, int h);
@@ -328,12 +336,17 @@ void car_draw(Tcar* car)
     glDisable(GL_TEXTURE_2D);
 }
 
-void cars_show(Tcar* car1, Tcar* car2)
+void cars_show(Cars* head)
 {
     map_show(0);
-    car_draw(car1);
-    car_draw(car2);
+    Cars* tmp = head;
+    while (tmp->next_car != NULL)
+    {
+        car_draw(&tmp->car);
+    }
     glutSwapBuffers();
+    //car_draw(car1);
+    //car_draw(car2);
 }
 
 void car_coords(Tcar* car, int x, int y)
@@ -430,48 +443,93 @@ Cars* create()
     }
 }
 
+void check_cars(Cars* head)
+{
+    Cars* tmp = head, * ptr = NULL;
+    while (tmp->next_car != NULL)
+    {
+        if (tmp->car.direction == 1 && tmp->car.y[0] > 820)
+        {
+            remove_element(tmp->car.num, head);
+            Map.car_counts--;
+        }
+        else if (tmp->car.direction == 2 && tmp->car.y[0] < -20)
+        {
+            remove_element(tmp->car.num, head);
+            Map.car_counts--;
+        }
+        ptr = tmp;
+        tmp = tmp->next_car;
+    }
+}
+
+Cars* head = NULL;
+
+void motorway_copy()
+{
+    add_car_end(head);
+    check_cars(head);
+}
+
+void timer(int value)
+{
+    add_car_end(head);
+    glutTimerFunc(1000, timer, 0);
+}
+
 void motorway()
 {
-    Cars* head = create();
+    head = create();
+    timer(0);
     if (model_active == true)
     {
         glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
         glClear(GL_COLOR_BUFFER_BIT);
         map_show(0);
         glutSwapBuffers();
-
-        add_car_end(head);
         srand(time(NULL));
-        time_t start = 0, end = 0;
-        Tcar car1, car2;
+        /*time_t start = 0, end = 0;*/
+        /*Tcar car1, car2;
         car1.direction = 1;
         init_car(&car1);
         car2.direction = 2;
-        init_car(&car2);
+        init_car(&car2);*/
         
         bool done1 = false, done2 = false;
         while (true)
         {
-            if (done1 == true && done2 == true) break;
+            //if (done1 == true && done2 == true) break;
             if (GetAsyncKeyState(VK_SPACE) & 0x1)
             {
                 space_done = true;
                 break;
             }
-            cars_show(&car1, &car2);
-            if (car1.y[0] < 844) car_drive(&car1);
+            Cars* tmp = head, * ptr;
+            while (tmp->next_car != NULL)
+            {
+                while ((tmp->car.direction == 1 && tmp->car.y[0] < 844) && (tmp->car.direction == 2 && tmp->car.y[0] > -44))
+                {
+                    cars_show(head);
+                    if (tmp->car.direction == 1)
+                    {
+                        if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 1000;
+                    }
+                    else if (tmp->car.direction == 2)
+                    {
+                        if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 1000;
+                    }
+                }
+                ptr = tmp;
+                tmp = tmp->next_car;
+                check_cars(head);
+            }
+            /*if (car1.y[0] < 844) car_drive(&car1);
             else done1 = true;
 
             if (car2.y[0] > -44) car_drive(&car2);
-            else done2 = true;
+            else done2 = true;*/
         }
-        /*start = time(NULL);
-        double diff = 0;
-        do
-        {
-            end = time(NULL);
-            diff = difftime(end, start);
-        } while (diff < 3);*/
+        
         glutIdleFunc(motorway);
     }
     if (space_done == true)
@@ -791,6 +849,7 @@ void reshape(GLint w, GLint h)
     glOrtho(0, w, 0, h, -1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    glutReshapeWindow(WINDOW_WIDTH, WINDOW_HEIGHT);
 }
 
 void mouse_pressed(int button, int state, int x, int y)
