@@ -1,39 +1,12 @@
 /* Copyright (c) Yakov D. Sendov & Salavat S. Babaev, 2022 */
+
 #define _CRT_SECURE_NO_WARNINGS
 
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <time.h>
-#include <windows.h>
-#include <GL/glut.h>
-
-// SIZES
-#define DEFAULT_ERROR -1
-#define WINDOW_NAME "Car Traffic Simulator"
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 800
-#define BUTTON_WIDTH 350
-#define BUTTON_HEIGHT 50
-#define MINI_BUTTON_WIDTH 70
-#define MINI_BUTTON_HEIGHT 20
-#define CAR_HEIGHT 44
-#define CAR_WIDTH 24
-
-// TEXTURES
-#define MAP_ONE "map_texture/motorway_1.txt"
-#define MAP_TWO "map_texture/crossroad_2.txt"
-#define MAP_THREE "map_texture/mult_crossroad_3.txt"
-#define TOTAL_CARS 20
-
-// COLORS
-#define COLOR_MENU_RED 0.102
-#define COLOR_MENU_GREEN 0.082
-#define COLOR_MENU_BLUE 0.247 
+#include "pincludes.h"
+#include "defines.h"
 
 GLint Width = 800, Height = 800;
+
 bool menu_activity = false;
 bool menu_button_3 = false;
 bool menu_button_2 = false;
@@ -41,7 +14,6 @@ bool menu_button_1 = false;
 bool menu_changes_2 = false;
 bool map_button = false;
 bool model_active = false;
-bool space_done = false;
 
 struct menu_button
 {
@@ -56,12 +28,12 @@ struct tex
 
 typedef struct
 {
-    int num;
-    int direction;
+    unsigned short num;
+    short direction;
     float x[2];
     float y[2];
-    int line;
-    int texture_id;
+    short line;
+    short texture_id;
     float speed;
 } Tcar;
 
@@ -82,28 +54,24 @@ struct Map
 } Map;
 
 /* Definition of functions */
-void error();
-void get_car_texture();
 GLuint get_map_texture(char* filename);
+void get_car_texture();
 void map_show(int value);
 void drawstring(float x, float y, char* string);
+void points(int first, int second);
 void control_lines(int line);
 void change_line();
+void check_distance(Cars* head);
+void car_position(Tcar* car, int first, int second);
 void car_draw(Tcar* car);
-void cars_show(Cars* head);
 void car_coords(Tcar* car, int x, int y);
 void coord_lines();
 void init_car(Tcar* car);
-void car_drive(Tcar* car);
-
-void check_cars(Cars* head);
 void push_car(Cars* head);
-void delete_car(int number, Cars* head);
+Cars* delete_headcar(Cars* head);
+Cars* delete_car(Cars* current, Cars* head);
 Cars* create_car();
-
-//void motorway_copy();
 void motorway();
-//void timer(int value);
 void crossroad();
 void mult_crossroad();
 void menu_buttons(struct menu_button* button, int h);
@@ -115,8 +83,8 @@ void menu();
 void display();
 void reshape(GLint w, GLint h);
 void mouse_pressed(int button, int state, int x, int y);
-void keyboard(unsigned char key, int x, int y);
 void struct_init();
+void error();
 /* ----------------------- */
 
 int main(int argc, char* argv[])
@@ -129,7 +97,6 @@ int main(int argc, char* argv[])
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutMouseFunc(mouse_pressed);
-    glutKeyboardFunc(keyboard);
     glutMainLoop();
 }
 
@@ -266,6 +233,32 @@ void coord_lines()
     glEnd();
 }
 
+void pause_background()
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
+    glColor4f(0.31, 0.31, 0.31, 0.7);
+    glBegin(GL_QUADS);
+    points(0, 800);
+    glEnd();
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+}
+
+void pause()
+{
+    while (1)
+    {
+        map_show(0);
+        pause_background();
+        glColor3ub(255, 255, 255);
+        drawstring(Width / 2 - 24, Height - 250, "PAUSE");
+        glutSwapBuffers();
+        if (GetAsyncKeyState(VK_ESCAPE) & 0x1) break;
+    }
+}
+
 void points(int first, int second)
 {
     glVertex2i(first, 0); 
@@ -276,15 +269,20 @@ void points(int first, int second)
 
 void control_lines(int line)
 {
-    glColor3ub(238, 220, 130);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
+    glColor4f(0.93, 0.86, 0.5, 0.3);
     glBegin(GL_QUADS);
-    if (line == 1) points(275, 317);
-    else if (line == 2) points(323, 356);
-    else if (line == 3) points(362, 404);
-    else if (line == 4) points(409, 449);
-    else if (line == 5) points(455, 495);
-    else if (line == 6) points(501, 540);
+    if (line == 1) points(275, 316);
+    else if (line == 2) points(321, 359);
+    else if (line == 3) points(365, 403);
+    else if (line == 4) points(409, 450);
+    else if (line == 5) points(456, 497);
+    else if (line == 6) points(499, 541);
     glEnd();
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
 }
 
 void change_line()
@@ -296,20 +294,126 @@ void change_line()
         glColor3ub(255, 255, 255);
         drawstring(Width / 2 - 340, Height - 760, "To change the selected lane for an accident, use the arrows on the keyboard (<- ->)");
         glutSwapBuffers();
-        if (GetAsyncKeyState(VK_LEFT) & 0x1 && Map.line > 1)
-        {
-            Map.line--;
-            printf("left %d\n", Map.line);
-        }
-        if (GetAsyncKeyState(VK_RIGHT) & 0x1 && Map.line < 6)
-        {
-            Map.line++;
-            printf("right %d\n", Map.line);
-        }
+        if (GetAsyncKeyState(VK_LEFT) & 0x1 && Map.line > 1) Map.line--;
+        if (GetAsyncKeyState(VK_RIGHT) & 0x1 && Map.line < 6) Map.line++;
         if (GetAsyncKeyState(VK_SPACE) & 0x1) break;
     }
-    model_active = true;
-    space_done = false;
+}
+
+void check_distance(Cars* head)
+{
+    Cars* tmp = head;
+    Cars** car_dir_1 = (Cars**)malloc(Map.car_counts * 3 * sizeof(Cars*));
+    Cars** car_dir_2 = (Cars**)malloc(Map.car_counts * 3 * sizeof(Cars*));
+    unsigned short range_dir1[3] = { 0, Map.car_counts, Map.car_counts * 2 };
+    unsigned short range_dir2[3] = { 0, Map.car_counts, Map.car_counts * 2 };
+    while (tmp->next_car != NULL)
+    {
+        if (tmp->car.direction == 1)
+        {
+            if (tmp->car.line == 1)
+            {
+                car_dir_1[range_dir1[0]] = tmp;
+                range_dir1[0]++;
+            }
+            else if (tmp->car.line == 2)
+            {
+                car_dir_1[range_dir1[1]] = tmp;
+                range_dir1[1]++;
+            }
+            else if (tmp->car.line == 3)
+            {
+                car_dir_1[range_dir1[2]] = tmp;
+                range_dir1[2]++;
+            }
+        }
+        if (tmp->car.direction == 2)
+        {
+            if (tmp->car.line == 1)
+            {
+                car_dir_2[range_dir2[0]] = tmp;
+                range_dir2[0]++;
+            }
+            else if (tmp->car.line == 2)
+            {
+                car_dir_2[range_dir2[1]] = tmp;
+                range_dir2[1]++;
+            }
+            else if (tmp->car.line == 3)
+            {
+                car_dir_2[range_dir2[2]] = tmp;
+                range_dir2[2]++;
+            }
+        }
+        tmp = tmp->next_car;
+    }
+    int num_ccar = 0,
+    num_dcar = 0,
+    count_line = 0,
+    end_arr = 0,
+    start_num_arr = 0,
+    count_dir = 1;
+    while (count_dir < 3)
+    {
+        count_line = 0;
+        while (count_line < 4)
+        {
+            if (count_line == 0)
+            {
+                start_num_arr = 0;
+                if (count_dir == 1) end_arr = range_dir1[0];
+                else end_arr = range_dir2[0];
+            }
+            else if (count_line == 1)
+            {
+                start_num_arr = Map.car_counts;
+                if (count_dir == 1) end_arr = range_dir1[1];
+                else end_arr = range_dir2[1];
+            }
+            else if (count_line == 2)
+            {
+                start_num_arr = Map.car_counts * 2;
+                if (count_dir == 1)  end_arr = range_dir1[2];
+                else end_arr = range_dir2[2];
+            }
+
+            for (num_ccar = start_num_arr; num_ccar < end_arr; num_ccar++)
+            {
+                for (num_dcar = start_num_arr; num_dcar < end_arr; num_dcar++)
+                {
+                    if (count_dir == 1 && car_dir_1[num_dcar] != car_dir_1[num_ccar])
+                    {
+                        if ((car_dir_1[num_dcar]->car.y[0] - car_dir_1[num_ccar]->car.y[0] > 0)
+                            && (car_dir_1[num_dcar]->car.y[0] - car_dir_1[num_ccar]->car.y[0] <= MIN_DISTANCE))
+                        {
+                            car_dir_1[num_ccar]->car.speed = car_dir_1[num_dcar]->car.speed;
+                        }
+                    }
+                    else if (count_dir == 2 && car_dir_2[num_dcar] != car_dir_2[num_ccar])
+                    {
+                        if ((car_dir_2[num_dcar]->car.y[0] - car_dir_2[num_ccar]->car.y[0] < 0)
+                            && (abs(car_dir_2[num_dcar]->car.y[0] - car_dir_2[num_ccar]->car.y[0]) <= MIN_DISTANCE))
+                        {
+                            car_dir_2[num_ccar]->car.speed = car_dir_2[num_dcar]->car.speed;
+                        }
+                    }
+                }
+            }
+            count_line++;
+        }
+        count_dir++;
+    }
+    free(car_dir_1);
+    free(car_dir_2);
+    tmp = NULL;
+}
+
+void car_position(Tcar* car, int first, int second)
+{
+    glTexCoord2f(first, second); glVertex2f(car->x[0], car->y[0] + CAR_HEIGHT); //LV
+    glTexCoord2f(second, second); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0] + CAR_HEIGHT); //RV
+    glTexCoord2f(second, first); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0]); //RN
+    glTexCoord2f(first, first); glVertex2f(car->x[0], car->y[0]); //LN
 }
 
 void car_draw(Tcar* car)
@@ -318,53 +422,11 @@ void car_draw(Tcar* car)
     glBindTexture(GL_TEXTURE_2D, car_tex.texture[car->texture_id]);
     glColor3f(1, 1, 1);
     glBegin(GL_QUADS);
-    if (car->direction == 1)
-    {
-        glTexCoord2f(0, 1); glVertex2f(car->x[0], car->y[0] + CAR_HEIGHT); //LV
-        glTexCoord2f(1, 1); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0] + CAR_HEIGHT); //RV
-        glTexCoord2f(1, 0); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0]); //RN
-        glTexCoord2f(0, 0); glVertex2f(car->x[0], car->y[0]); //LN
-    }
-    else if (car->direction == 2)
-    {
-        glTexCoord2f(1, 0); glVertex2f(car->x[0], car->y[0] + CAR_HEIGHT); //LV
-        glTexCoord2f(0, 0); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0] + CAR_HEIGHT); //RV
-        glTexCoord2f(0, 1); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0]); //RN
-        glTexCoord2f(1, 1); glVertex2f(car->x[0], car->y[0]); //LN
-    }
+    if (car->direction == 1) car_position(car, 0, 1);
+    else if (car->direction == 2) car_position(car, 1, 0);
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_TEXTURE_2D);
-}
-
-bool done = false;
-
-void cars_show(Cars* head)
-{
-    map_show(0);
-    Cars* tmp = head;
-    while (tmp != NULL)
-    {
-        car_draw(&tmp->car);
-        if (tmp->car.direction == 1)
-        {
-            if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 3000;
-        }
-        else if (tmp->car.direction == 2)
-        {
-            if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 3000;
-        }
-        tmp = tmp->next_car;
-    }
-    /*while (tmp != NULL)
-    {
-        if ((tmp->car.direction == 1 && tmp->car.y[0] > 800) || (tmp->car.direction == 2 && tmp->car.y[0] < 0)) done = true;
-        else done = false;
-        tmp = tmp->next_car;
-    }*/
-    glutSwapBuffers();
-    //car_draw(car1);
-    //car_draw(car2);
 }
 
 void car_coords(Tcar* car, int x, int y)
@@ -385,28 +447,16 @@ void init_car(Tcar* car)
     if (car->direction == 1)
     {
         if (car->line == 1) car_coords(car, 420, -44);
-        else if (car->line == 2) car_coords(car, 468, -44);
+        else if (car->line == 2) car_coords(car, 465, -44);
         else if (car->line == 3) car_coords(car, 510, -44);
     }
     else if (car->direction == 2)
     {
         if (car->line == 1) car_coords(car, 283, 844);
-        else if (car->line == 2) car_coords(car, 330, 844);
+        else if (car->line == 2) car_coords(car, 328, 844);
         else if (car->line == 3) car_coords(car, 373, 844);
     }
     car->texture_id = rand() % 19;
-}
-
-void car_drive(Tcar* car)
-{
-    if (car->direction == 1)
-    {
-        if (car->y[0] < 844) car->y[0] += car->speed / 1000;
-    }
-    else if (car->direction == 2)
-    {
-        if (car->y[0] > -44) car->y[0] -= car->speed / 1000;
-    }
 }
 
 Cars* create_car()
@@ -425,31 +475,32 @@ Cars* create_car()
     }
 }
 
-void delete_car(int number, Cars* head)
+Cars* delete_headcar(Cars* head)
+{
+    Cars* temp = head->next_car;
+    free(head);
+    return temp;
+}
+
+Cars* delete_car(Cars* current, Cars* head)
 {
     Cars* temp = head, * ptr = NULL;
-    if (temp == NULL) return;
+    if (temp == NULL) return NULL;
+    else if (current == head)
+    {
+        temp = head->next_car;
+        free(head);
+        return temp;
+    }
     else
     {
-        if (temp->next_car == NULL)
+        while (temp->next_car != current)
         {
-            free(head);
-            head = NULL;
-            return;
-        }
-        while (temp->car.num != number)
-        {
-            ptr = temp;
             temp = temp->next_car;
         }
-        if (temp == head)
-        {
-            head = temp->next_car;
-            return;
-        }
-        if (temp->next_car != NULL && ptr != NULL) ptr->next_car = temp->next_car;
-        else if (ptr != NULL) ptr->next_car = NULL;
-        free(temp);
+        temp = current->next_car;
+        free(current);
+        return temp;
     }
 }
 
@@ -461,81 +512,74 @@ void push_car(Cars* head)
     temp->next_car = new_node;
 }
 
-void check_cars(Cars* head)
+void print_cars(Cars* head)
 {
     Cars* tmp = head;
-    while (tmp->next_car != NULL)
+    while (tmp != NULL)
     {
-        if (tmp->car.direction == 1 && tmp->car.y[0] > 840)
-        {
-            delete_car(tmp->car.num, head);
-            Map.car_counts--;
-        }
-        else if (tmp->car.direction == 2 && tmp->car.y[0] < -40)
-        {
-            delete_car(tmp->car.num, head);
-            Map.car_counts--;
-        }
+        printf("%d ", tmp->car.num);
         tmp = tmp->next_car;
     }
+    printf("\n");
 }
-
-Cars* head = NULL;
-
-void motorway_copy()
-{
-    glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
-    glClear(GL_COLOR_BUFFER_BIT);
-    map_show(0);
-    glutSwapBuffers();
-}
-
-//void timer(int value)
-//{
-//    add_car_end(head);
-//    glutTimerFunc(2000, timer, 0);
-//}
 
 void motorway()
 {
+    Cars* head = NULL;
     head = create_car();
-    //timer(0);
     if (model_active == true)
     {
-        motorway_copy();
-        clock_t start = 0, end = 0;
+        glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+        map_show(0);
+        glutSwapBuffers();
+        clock_t start = clock(), end = 0;
         while (true)
         {
-            if (head == NULL) head = create_car();
-            else
+            if (GetAsyncKeyState(VK_SPACE) & 0x1) change_line();
+            if (GetAsyncKeyState(VK_ESCAPE) & 0x1) pause();
+            if ((end - start) / CLOCKS_PER_SEC > 0.5)
             {
-                if (space_done == true) break;
+                push_car(head);
+                print_cars(head);
                 start = clock();
-                while (1)
+                end = 0;
+            }
+            check_distance(head);
+            map_show(0);
+            Cars* tmp = head, * ptr = NULL;
+            while (tmp != NULL)
+            {
+                car_draw(&tmp->car);
+                if (tmp->car.direction == 1)
                 {
-                    if (GetAsyncKeyState(VK_SPACE) & 0x1)
+                    if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 3000;
+                    else
                     {
-                        space_done = true;
-                        model_active = false;
+                        if (tmp == head) head = delete_headcar(head);
+                        else ptr->next_car = delete_car(tmp, head);
+                        Map.car_counts--;
                         break;
                     }
-                    if ((end - start) / CLOCKS_PER_SEC > 0.75)
-                    {
-                        push_car(head);
-                        start = clock();
-                        end = 0;
-                    }
-                    cars_show(head);
-                    end = clock();
                 }
-                //check_cars(head);
+                else if (tmp->car.direction == 2)
+                {
+                    if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 3000;
+                    else
+                    {
+                        if (tmp == head) head = delete_headcar(head);
+                        else ptr->next_car = delete_car(tmp, head);
+                        Map.car_counts--;
+                        break;
+                    }
+                }
+                ptr = tmp;
+                tmp = tmp->next_car;
             }
+            glutSwapBuffers();
+            end = clock();
         }
         glutIdleFunc(motorway);
-    }
-    if (space_done == true)
-    {
-        change_line();
     }
 }
 
@@ -708,14 +752,9 @@ void settings_buttons()
 
 void processing_buttons(int button)
 {
-    int delta = BUTTON_HEIGHT;
-    int midX = Width / 2;
-    int midY = Height / 2;
-    int left, right, top, bottom;
-    left = midX - BUTTON_WIDTH / 2;
-    right = left + BUTTON_WIDTH;
-    bottom = midY - BUTTON_HEIGHT / 2;
-    top = bottom + BUTTON_HEIGHT;
+    int delta = BUTTON_HEIGHT, midX = Width / 2, midY = Height / 2;
+    int left = midX - BUTTON_WIDTH / 2, right = left + BUTTON_WIDTH,
+    bottom = midY - BUTTON_HEIGHT / 2, top = bottom + BUTTON_HEIGHT;
     if (button == 3)
     {
         menu_button_3 = true;
@@ -854,19 +893,17 @@ void reshape(GLint w, GLint h)
 
 void mouse_pressed(int button, int state, int x, int y)
 {
-    switch (button)
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
     {
-    case GLUT_LEFT_BUTTON: 
-    {
-        printf("%d | %d\n", x, y); 
-        if (state == GLUT_DOWN && menu_activity == true)
+        printf("%d | %d\n", x, y);
+        if (menu_activity == true)
         {
             if (x <= 575 && x >= 225 && y >= 575 && y <= 625) exit(0);
             else if (x <= 575 && x >= 225 && y >= 500 && y <= 550) processing_buttons(3);
             else if (x <= 575 && x >= 225 && y >= 425 && y <= 475) processing_buttons(2);
             else if (x <= 575 && x >= 225 && y >= 350 && y <= 400) processing_buttons(1);
         }
-        else if (state == GLUT_DOWN && menu_button_3 == true)
+        else if (menu_button_3 == true)
         {
             if (x <= 575 && x >= 225 && y >= 550 && y <= 600)
             {
@@ -874,7 +911,7 @@ void mouse_pressed(int button, int state, int x, int y)
                 glutPostRedisplay();
             }
         }
-        else if (state == GLUT_DOWN && menu_button_2 == true)
+        else if (menu_button_2 == true)
         {
             if (x <= 575 && x >= 225 && y >= 550 && y <= 600)
             {
@@ -917,7 +954,7 @@ void mouse_pressed(int button, int state, int x, int y)
                 processing_buttons(2);
             }
         }
-        else if (state == GLUT_DOWN && menu_button_1 == true)
+        else if (menu_button_1 == true)
         {
             if (x <= 285 && x >= 225 && y >= 550 && y <= 600)
             {
@@ -930,7 +967,7 @@ void mouse_pressed(int button, int state, int x, int y)
                 map_choose();
             }
         }
-        else if (state == GLUT_DOWN && map_button == true)
+        else if (map_button == true)
         {
             if (x <= 575 && x >= 225 && y >= 575 && y <= 625)
             {
@@ -947,50 +984,14 @@ void mouse_pressed(int button, int state, int x, int y)
             {
                 map_button = false;
                 model_active = true;
-                printf("CROSS\n");
                 crossroad();
             }
             else if (x <= 575 && x >= 225 && y >= 425 && y <= 475)
             {
                 map_button = false;
                 model_active = true;
-                printf("MMMCROSS\n");
                 mult_crossroad();
             }
         }
-        break;
     }
-    case GLUT_RIGHT_BUTTON: break;
-    }
-}
-
-void keyboard(unsigned char key, int x, int y)
-{
-    #define ESCAPE '\033'
-    if (key == 27 && model_active == true)
-    {
-        model_active = false;
-        printf("escapeescapeescapeescapeescape\n");
-        //pause();
-    }
-    else if (key == 27 && model_active == false)
-    {
-        model_active = true;
-        printf("escapeescapeescapeescapeescape\n");
-        motorway();
-    }
-    //else if (key == 32 && model_active == true)
-    //{
-    //    space_done = true;
-    //    model_active = false;
-    //    printf("SPACE\n");
-    //    //pause();
-    //}
-    //else if (key == 32 && model_active == false)
-    //{
-    //    space_done = false;
-    //    model_active = true;
-    //    printf("SPACE\n");
-    //    motorway();
-    //}
 }
