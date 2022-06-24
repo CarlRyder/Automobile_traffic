@@ -32,6 +32,7 @@ typedef struct
     short direction;
     float x[2];
     float y[2];
+    bool turn;
     short line;
     short texture_id;
     float speed;
@@ -64,7 +65,7 @@ void control_lines(int line);
 void change_line(int map, Cars* head);
 void pause(int map, Cars* head, bool flag);
 void check_distance(Cars* head);
-void car_position(Tcar* car, int first, int second);
+void car_position(Tcar* car, int first, int second, bool flag);
 void car_draw(Tcar* car);
 void car_coords(Tcar* car, int x, int y);
 void car_static_show(Cars* head);
@@ -596,20 +597,40 @@ void check_distance(Cars* head)
     tmp = NULL;
 }
 
-void car_position(Tcar* car, int first, int second)
+void car_position(Tcar* car, int first, int second, bool flag)
 {
-    glTexCoord2f(first, second); glVertex2f(car->x[0], car->y[0] + CAR_HEIGHT); //LV
-    glTexCoord2f(second, second); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0] + CAR_HEIGHT); //RV
-    glTexCoord2f(second, first); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0]); //RN
-    glTexCoord2f(first, first); glVertex2f(car->x[0], car->y[0]); //LN
+    if (flag == true)
+    {
+        glTexCoord2f(first, second); glVertex2f(car->x[0] + CAR_WIDTH / 2, car->y[0] + CAR_HEIGHT); // LV
+        glTexCoord2f(second, second); glVertex2f(car->x[0] + CAR_WIDTH * 1.5, car->y[0] + CAR_HEIGHT); // RV
+        glTexCoord2f(second, first); glVertex2f(car->x[0] + CAR_WIDTH / 2, car->y[0]); // RN
+        glTexCoord2f(first, first); glVertex2f(car->x[0] - CAR_WIDTH / 2, car->y[0]); // LN
+    }
+    else
+    {
+        glTexCoord2f(first, second); glVertex2f(car->x[0], car->y[0] + CAR_HEIGHT); //LV
+        glTexCoord2f(second, second); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0] + CAR_HEIGHT); //RV
+        glTexCoord2f(second, first); glVertex2f(car->x[0] + CAR_WIDTH, car->y[0]); //RN
+        glTexCoord2f(first, first); glVertex2f(car->x[0], car->y[0]); //LN
+    }
 }
 
-void car_pos(Tcar* car, int first, int second)
+void car_pos(Tcar* car, int first, int second, bool flag)
 {
-    glTexCoord2f(first, first); glVertex2f(car->x[0] - CAR_HEIGHT, car->y[0]); // LV
-    glTexCoord2f(first, second); glVertex2f(car->x[0], car->y[0]); // RV
-    glTexCoord2f(second, second); glVertex2f(car->x[0], car->y[0] - CAR_WIDTH); // RN
-    glTexCoord2f(second, first); glVertex2f(car->x[0] - CAR_HEIGHT, car->y[0] - CAR_WIDTH); // LN
+    if (flag == true)
+    {
+        glTexCoord2f(first, first); glVertex2f(car->x[0] - CAR_HEIGHT, car->y[0]); // LV
+        glTexCoord2f(first, second); glVertex2f(car->x[0], car->y[0]); // RV
+        glTexCoord2f(second, second); glVertex2f(car->x[0], car->y[0] - CAR_WIDTH); // RN
+        glTexCoord2f(second, first); glVertex2f(car->x[0] - CAR_HEIGHT, car->y[0]); // LN
+    }
+    else
+    {
+        glTexCoord2f(first, first); glVertex2f(car->x[0] - CAR_HEIGHT, car->y[0]); // LV
+        glTexCoord2f(first, second); glVertex2f(car->x[0], car->y[0]); // RV
+        glTexCoord2f(second, second); glVertex2f(car->x[0], car->y[0] - CAR_WIDTH); // RN
+        glTexCoord2f(second, first); glVertex2f(car->x[0] - CAR_HEIGHT, car->y[0] - CAR_WIDTH); // LN
+    }
 }
 
 void car_draw(Tcar* car)
@@ -618,10 +639,99 @@ void car_draw(Tcar* car)
     glBindTexture(GL_TEXTURE_2D, car_tex.texture[car->texture_id]);
     glColor3f(1, 1, 1);
     glBegin(GL_QUADS);
-    if (car->direction == 1) car_position(car, 0, 1);
-    else if (car->direction == 2) car_position(car, 1, 0);
-    else if (car->direction == 3) car_pos(car, 1, 0);
-    else if (car->direction == 4) car_pos(car, 0, 1);
+    if (map_1 == true)
+    {
+        if (car->direction == 1) car_position(car, 0, 1, false);
+        else if (car->direction == 2) car_position(car, 1, 0, false);
+    }
+    if (map_2 == true)
+    {
+        if (car->direction == 1)
+        {
+            if (car->line == 3 && car->turn == false)
+            {
+                if (car->y[0] > 220 && car->y[0] < 250)
+                {
+                    car_position(car, 0, 1, false);
+                    car->x[0] += 0.02;
+                }
+                else if (car->y[0] > 250)
+                {
+                    car->direction = 4;
+                    car->x[0] = 635;
+                    car->y[0] = 296;
+                    car->line = 1;
+                    car->turn = true;
+                }
+                else car_position(car, 0, 1, false);
+            }
+            else car_position(car, 0, 1, false);
+        }
+        else if (car->direction == 2)
+        {
+            if (car->line == 1 && car->turn == false)
+            {
+                if (car->y[0] > 500 && car->y[0] < 540)
+                {
+                    car_position(car, 1, 0, false);
+                    car->x[0] -= 0.02;
+                }
+                else if (car->y[0] < 500)
+                {
+                    car->direction = 3;
+                    car->x[0] = 235;
+                    car->y[0] = 525;
+                    car->line = 3;
+                    car->turn = true;
+                }
+                else car_position(car, 1, 0, false);
+            }
+            else car_position(car, 1, 0, false);
+        }
+        else if (car->direction == 3)
+        {
+            car_pos(car, 1, 0, false);
+            if (car->line == 3 && car->turn == false)
+            {
+                if (car->x[0] > 550 && car->x[0] < 610)
+                {
+                    car_pos(car, 1, 0, false);
+                    car->y[0] += 0.02;
+                }
+                else if (car->x[0] < 550)
+                {
+                    car->direction = 1;
+                    car->x[0] = 510;
+                    car->y[0] = 575;
+                    car->line = 3;
+                    car->turn = true;
+                }
+                else car_pos(car, 1, 0, false);
+            }
+            else car_pos(car, 1, 0, false);
+        }
+        else if (car->direction == 4)
+        {
+            if (car->line == 1 && car->turn == false)
+            {
+                if (car->x[0] > 260 && car->x[0] < 290)
+                {
+                    car_pos(car, 0, 1, false);
+                    car->y[0] -= 0.02;
+                }
+                else if (car->x[0] > 290)
+                {
+                    car->direction = 2;
+                    car->x[0] = 283;
+                    car->y[0] = 225;
+                    car->line = 1;
+                    car->turn = true;
+                }
+                else car_pos(car, 0, 1, false);
+            }
+            else car_pos(car, 0, 1, false);
+        }
+    }
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_TEXTURE_2D);
@@ -644,6 +754,7 @@ void init_car(Tcar* car)
 {
     car->num = Map.car_counts + 1;
     Map.car_counts++;
+    car->turn = false;
     car->direction = rand() % 2 + 1;
     if (map_2 == true) car->direction = rand() % 4 + 1;
     car->line = rand() % 3 + 1;
@@ -970,16 +1081,16 @@ void traffic_lights()
     if (traffic_light1 == true && traffic_light2 == false)
     {
         light_draw(565, 615, 592, 568, true);
-        light_draw(245, 224, 201, 179, true);
-        light_draw(236, 615, 592, 568, false);
-        light_draw(560, 224, 201, 179, false);
+        light_draw(229, 214, 191, 169, true);
+        light_draw(217, 615, 592, 568, false);
+        light_draw(565, 214, 191, 169, false);
     }
     else if (traffic_light1 == false && traffic_light2 == true)
     {
         light_draw(565, 615, 592, 568, false);
-        light_draw(245, 224, 201, 179, false);
-        light_draw(236, 615, 592, 568, true);
-        light_draw(560, 224, 201, 179, true);
+        light_draw(229, 214, 191, 169, false);
+        light_draw(217, 615, 592, 568, true);
+        light_draw(565, 214, 191, 169, true);
     }
 }
 
@@ -1200,6 +1311,8 @@ void mult_crossroad()
                 pause_active = true;
                 break;
             }
+            map_show(2);
+            glutSwapBuffers();
         }
     }
     if (pause_active == true) pause(2, NULL, false);
