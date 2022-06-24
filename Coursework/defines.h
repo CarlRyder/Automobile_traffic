@@ -10,7 +10,8 @@
 #define MINI_BUTTON_HEIGHT 20
 #define CAR_HEIGHT 44
 #define CAR_WIDTH 24
-#define MIN_DISTANCE 65
+#define MIN_DISTANCE 65.0
+#define LIGHT_SIZE 15
 
 // TEXTURES
 #define MAP_ONE "map_texture/motorway_1.txt"
@@ -22,3 +23,8 @@
 #define COLOR_MENU_RED 0.102
 #define COLOR_MENU_GREEN 0.082
 #define COLOR_MENU_BLUE 0.247
+
+// KEYS
+#define VK_A 0x41
+#define VK_Q 0x51
+#define VK_S 0x53
