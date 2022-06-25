@@ -265,7 +265,7 @@ void model_save(int map, Cars* head)
     fprintf(saves, "Cars stats:\n");
     while (temp != NULL)
     {
-        fprintf(saves, "%d %d %f %f %d %d %f\n", temp->car.num, temp->car.direction, temp->car.x[0], temp->car.y[0], temp->car.line, temp->car.texture_id, temp->car.speed);
+        fprintf(saves, "%d %d %f %f %d %d %d %f\n", temp->car.num, temp->car.direction, temp->car.x[0], temp->car.y[0], temp->car.line, temp->car.turn, temp->car.texture_id, temp->car.speed);
         temp = temp->next_car;
     }
     fclose(saves);
@@ -348,15 +348,40 @@ void info(int max, Cars* head)
     _itoa(max, value, 10);
     drawstring(100, Height - 80, value);
 
-    drawstring(5, Height - 100, "Simulation time (sec):");
+    if (map_3 == true) drawstring(5, Height - 720, "Simulation time (sec):");
+    else drawstring(5, Height - 100, "Simulation time (sec):");
     char model_time[10] = { 0 };
     _itoa(Map.time, model_time, 10);
-    drawstring(184, Height - 100, model_time);
+    if (map_3 == true) drawstring(184, Height - 720, model_time);
+    else drawstring(184, Height - 100, model_time);
 
-    drawstring(5, Height - 120, "Interval time (sec):");
-    if (Map.interval == 0.75) drawstring(160, Height - 120, "0.75");
-    else if (Map.interval == 1) drawstring(160, Height - 120, "1");
-    else if (Map.interval == 1.25) drawstring(160, Height - 120, "1.25");
+    if (map_3 == true) drawstring(5, Height - 740, "Interval time (sec):");
+    else drawstring(5, Height - 120, "Interval time (sec):");
+    if (map_3 == true)
+    {
+        if (Map.interval == 0.75) drawstring(160, Height - 740, "0.75");
+        else if (Map.interval == 1) drawstring(160, Height - 740, "1");
+        else if (Map.interval == 1.25) drawstring(160, Height - 740, "1.25");
+    }
+    else
+    {
+        if (Map.interval == 0.75) drawstring(160, Height - 120, "0.75");
+        else if (Map.interval == 1) drawstring(160, Height - 120, "1");
+        else if (Map.interval == 1.25) drawstring(160, Height - 120, "1.25");
+    }
+
+    if (map_3 == true) drawstring(5, Height - 760, "Autosave:");
+    else drawstring(5, Height - 140, "Autosave:");
+    if (map_3 == true)
+    {
+        if (Map.autosave == true) drawstring(90, Height - 760, "On");
+        else drawstring(90, Height - 760, "Off");
+    }
+    else
+    {
+        if (Map.autosave == true) drawstring(90, Height - 140, "On");
+        else drawstring(90, Height - 140, "Off");
+    }
 }
 
 void control_lines(int line)
@@ -413,15 +438,20 @@ void change_line(int map, Cars* head)
 void check_distance(Cars* head)
 {
     Cars* tmp = head;
+
     Cars** car_dir_1 = (Cars**)malloc(Map.car_counts * 3 * sizeof(Cars*));
     Cars** car_dir_2 = (Cars**)malloc(Map.car_counts * 3 * sizeof(Cars*));
     Cars** car_dir_3 = (Cars**)malloc(Map.car_counts * 3 * sizeof(Cars*));
     Cars** car_dir_4 = (Cars**)malloc(Map.car_counts * 3 * sizeof(Cars*));
+    Cars** car_dir_5 = (Cars**)malloc(Map.car_counts * 3 * sizeof(Cars*));
+    Cars** car_dir_6 = (Cars**)malloc(Map.car_counts * 3 * sizeof(Cars*));
 
     unsigned short range_dir1[3] = { 0, Map.car_counts, Map.car_counts * 2 };
     unsigned short range_dir2[3] = { 0, Map.car_counts, Map.car_counts * 2 };
     unsigned short range_dir3[3] = { 0, Map.car_counts, Map.car_counts * 2 };
     unsigned short range_dir4[3] = { 0, Map.car_counts, Map.car_counts * 2 };
+    unsigned short range_dir5[3] = { 0, Map.car_counts, Map.car_counts * 2 };
+    unsigned short range_dir6[3] = { 0, Map.car_counts, Map.car_counts * 2 };
 
     while (tmp->next_car != NULL)
     {
@@ -444,7 +474,7 @@ void check_distance(Cars* head)
                 range_dir1[2]++;
             }
         }
-        if (tmp->car.direction == 2)
+        else if (tmp->car.direction == 2)
         {
             if (tmp->car.line == 1)
             {
@@ -462,7 +492,7 @@ void check_distance(Cars* head)
                 range_dir2[2]++;
             }
         }
-        if (tmp->car.direction == 3)
+        else if (tmp->car.direction == 3)
         {
             if (tmp->car.line == 1)
             {
@@ -480,7 +510,7 @@ void check_distance(Cars* head)
                 range_dir3[2]++;
             }
         }
-        if (tmp->car.direction == 4)
+        else if (tmp->car.direction == 4)
         {
             if (tmp->car.line == 1)
             {
@@ -498,38 +528,80 @@ void check_distance(Cars* head)
                 range_dir4[2]++;
             }
         }
+        else if (tmp->car.direction == 5)
+        {
+            if (tmp->car.line == 1)
+            {
+                car_dir_5[range_dir5[0]] = tmp;
+                range_dir5[0]++;
+            }
+            else if (tmp->car.line == 2)
+            {
+                car_dir_5[range_dir5[1]] = tmp;
+                range_dir5[1]++;
+            }
+            else if (tmp->car.line == 3)
+            {
+                car_dir_5[range_dir5[2]] = tmp;
+                range_dir5[2]++;
+            }
+        }
+        else if (tmp->car.direction == 6)
+        {
+            if (tmp->car.line == 1)
+            {
+                car_dir_6[range_dir6[0]] = tmp;
+                range_dir6[0]++;
+            }
+            else if (tmp->car.line == 2)
+            {
+                car_dir_6[range_dir6[1]] = tmp;
+                range_dir6[1]++;
+            }
+            else if (tmp->car.line == 3)
+            {
+                car_dir_6[range_dir6[2]] = tmp;
+                range_dir6[2]++;
+            }
+        }
         tmp = tmp->next_car;
     }
 
-    int num_ccar = 0, num_dcar = 0, count_line = 0, end_arr = 0, start_num_arr = 0, count_dir = 1;
-    while (count_dir < 5)
+    int num_ccar = 0, num_dcar = 0, count_line = 1, end_arr = 0, start_num_arr = 0, count_dir = 1;
+    while (count_dir < 7)
     {
-        count_line = 0;
-        while (count_line < 3)
+        count_line = 1;
+        while (count_line < 4)
         {
-            if (count_line == 0)
+            if (count_line == 1)
             {
                 start_num_arr = 0;
                 if (count_dir == 1) end_arr = range_dir1[0];
                 else if (count_dir == 2) end_arr = range_dir2[0];
                 else if (count_dir == 3) end_arr = range_dir3[0];
                 else if (count_dir == 4) end_arr = range_dir4[0];
+                else if (count_dir == 5) end_arr = range_dir5[0];
+                else if (count_dir == 6) end_arr = range_dir6[0];
             }
-            else if (count_line == 1)
+            else if (count_line == 2)
             {
                 start_num_arr = Map.car_counts;
                 if (count_dir == 1) end_arr = range_dir1[1];
                 else if (count_dir == 2) end_arr = range_dir2[1];
                 else if (count_dir == 3) end_arr = range_dir3[1];
                 else if (count_dir == 4) end_arr = range_dir4[1];
+                else if (count_dir == 5) end_arr = range_dir5[1];
+                else if (count_dir == 6) end_arr = range_dir6[1];
             }
-            else if (count_line == 2)
+            else if (count_line == 3)
             {
                 start_num_arr = Map.car_counts * 2;
                 if (count_dir == 1) end_arr = range_dir1[2];
                 else if (count_dir == 2) end_arr = range_dir2[2];
                 else if (count_dir == 3) end_arr = range_dir3[2];
                 else if (count_dir == 4) end_arr = range_dir4[2];
+                else if (count_dir == 5) end_arr = range_dir5[2];
+                else if (count_dir == 6) end_arr = range_dir6[2];
             }
 
             for (num_ccar = start_num_arr; num_ccar < end_arr; num_ccar++)
@@ -538,10 +610,11 @@ void check_distance(Cars* head)
                 {
                     if (count_dir == 1 && car_dir_1[num_dcar] != car_dir_1[num_ccar])
                     {
-                        if (car_dir_1[num_dcar]->car.y[0] - car_dir_1[num_ccar]->car.y[0] > 0
-                            && car_dir_1[num_dcar]->car.y[0] - car_dir_1[num_ccar]->car.y[0] <= MIN_DISTANCE)
+                        float y_dcar = car_dir_1[num_dcar]->car.y[0];
+                        float y_ccar = car_dir_1[num_ccar]->car.y[0];
+                        if (y_dcar - y_ccar > 0 && y_dcar - y_ccar <= MIN_DISTANCE)
                         {
-                            if (car_dir_1[num_dcar]->car.y[0] - car_dir_1[num_ccar]->car.y[0] < 44.0)
+                            if (y_dcar - y_ccar < 44.0)
                             {
                                 car_dir_1[num_ccar]->car.y[0] -= 21.0;
                             }
@@ -550,10 +623,11 @@ void check_distance(Cars* head)
                     }
                     else if (count_dir == 2 && car_dir_2[num_dcar] != car_dir_2[num_ccar])
                     {
-                        if (car_dir_2[num_dcar]->car.y[0] - car_dir_2[num_ccar]->car.y[0] < 0
-                            && abs(car_dir_2[num_dcar]->car.y[0] - car_dir_2[num_ccar]->car.y[0]) <= MIN_DISTANCE)
+                        float y_dcar = car_dir_2[num_dcar]->car.y[0];
+                        float y_ccar = car_dir_2[num_ccar]->car.y[0];
+                        if (y_dcar - y_ccar < 0 && fabsf(y_dcar - y_ccar) <= MIN_DISTANCE)
                         {
-                            if (car_dir_2[num_dcar]->car.y[0] - car_dir_2[num_ccar]->car.y[0] > -44.0)
+                            if (y_dcar - y_ccar > -44.0)
                             {
                                 car_dir_2[num_ccar]->car.y[0] += 21.0;
                             }
@@ -562,10 +636,11 @@ void check_distance(Cars* head)
                     }
                     else if (count_dir == 3 && car_dir_3[num_dcar] != car_dir_3[num_ccar])
                     {
-                        if (car_dir_3[num_dcar]->car.x[0] - car_dir_3[num_ccar]->car.x[0] < 0
-                            && abs(car_dir_3[num_dcar]->car.x[0] - car_dir_3[num_ccar]->car.x[0]) <= MIN_DISTANCE)
+                        float y_dcar = car_dir_3[num_dcar]->car.y[0];
+                        float y_ccar = car_dir_3[num_ccar]->car.y[0];
+                        if (y_dcar - y_ccar < 0 && fabsf(y_dcar - y_ccar) <= MIN_DISTANCE)
                         {
-                            if (car_dir_3[num_dcar]->car.x[0] - car_dir_3[num_ccar]->car.x[0] > -44.0)
+                            if (y_dcar - y_ccar > -44.0)
                             {
                                 car_dir_3[num_ccar]->car.x[0] += 21.0;
                             }
@@ -574,14 +649,41 @@ void check_distance(Cars* head)
                     }
                     else if (count_dir == 4 && car_dir_4[num_dcar] != car_dir_4[num_ccar])
                     {
-                        if (car_dir_4[num_dcar]->car.x[0] - car_dir_4[num_ccar]->car.x[0] > 0
-                            && car_dir_4[num_dcar]->car.x[0] - car_dir_4[num_ccar]->car.x[0] <= MIN_DISTANCE)
+                        float y_dcar = car_dir_4[num_dcar]->car.y[0];
+                        float y_ccar = car_dir_4[num_ccar]->car.y[0];
+                        if (y_dcar - y_ccar > 0 && y_dcar - y_ccar <= MIN_DISTANCE)
                         {
-                            if (car_dir_4[num_dcar]->car.x[0] - car_dir_4[num_ccar]->car.x[0] < 44.0)
+                            if (y_dcar - y_ccar < 44.0)
                             {
                                 car_dir_4[num_ccar]->car.x[0] -= 21.0;
                             }
                             car_dir_4[num_ccar]->car.speed = car_dir_4[num_dcar]->car.speed;
+                        }
+                    }
+                    else if (count_dir == 5 && car_dir_5[num_dcar] != car_dir_5[num_ccar])
+                    {
+                        float y_dcar = car_dir_5[num_dcar]->car.y[0];
+                        float y_ccar = car_dir_5[num_ccar]->car.y[0];
+                        if (y_dcar - y_ccar < 0 && fabsf(y_dcar - y_ccar) <= MIN_DISTANCE)
+                        {
+                            if (y_dcar - y_ccar > -44.0)
+                            {
+                                car_dir_5[num_ccar]->car.x[0] += 21.0;
+                            }
+                            car_dir_5[num_ccar]->car.speed = car_dir_5[num_dcar]->car.speed;
+                        }
+                    }
+                    else if (count_dir == 6 && car_dir_6[num_dcar] != car_dir_6[num_ccar])
+                    {
+                        float y_dcar = car_dir_6[num_dcar]->car.y[0];
+                        float y_ccar = car_dir_6[num_ccar]->car.y[0];
+                        if (y_dcar - y_ccar > 0 && y_dcar - y_ccar <= MIN_DISTANCE)
+                        {
+                            if (y_dcar - y_ccar < 44.0)
+                            {
+                                car_dir_6[num_ccar]->car.x[0] -= 21.0;
+                            }
+                            car_dir_6[num_ccar]->car.speed = car_dir_4[num_dcar]->car.speed;
                         }
                     }
                 }
@@ -594,6 +696,8 @@ void check_distance(Cars* head)
     free(car_dir_2);
     free(car_dir_3);
     free(car_dir_4);
+    free(car_dir_5);
+    free(car_dir_6);
     tmp = NULL;
 }
 
@@ -644,7 +748,7 @@ void car_draw(Tcar* car)
         if (car->direction == 1) car_position(car, 0, 1, false);
         else if (car->direction == 2) car_position(car, 1, 0, false);
     }
-    if (map_2 == true)
+    else if (map_2 == true)
     {
         if (car->direction == 1)
         {
@@ -690,7 +794,6 @@ void car_draw(Tcar* car)
         }
         else if (car->direction == 3)
         {
-            car_pos(car, 1, 0, false);
             if (car->line == 3 && car->turn == false)
             {
                 if (car->x[0] > 550 && car->x[0] < 610)
@@ -732,6 +835,15 @@ void car_draw(Tcar* car)
             else car_pos(car, 0, 1, false);
         }
     }
+    else if (map_3 == true)
+    {
+        if (car->direction == 1) car_position(car, 0, 1, false);
+        else if (car->direction == 2) car_position(car, 1, 0, false);
+        else if (car->direction == 3) car_pos(car, 1, 0, false);
+        else if (car->direction == 4) car_pos(car, 0, 1, false);
+        else if (car->direction == 5) car_pos(car, 1, 0, false);
+        else if (car->direction == 6) car_pos(car, 0, 1, false);
+    }
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
     glDisable(GL_TEXTURE_2D);
@@ -743,7 +855,7 @@ void car_coords(Tcar* car, int x, int y)
     car->x[1] = x + CAR_WIDTH;
     car->y[0] = y;
     car->y[1] = y + CAR_HEIGHT;
-    if (car->direction == 3 || car->direction == 4)
+    if (car->direction == 3 || car->direction == 4 || car->direction == 5 || car->direction == 6)
     {
         car->x[1] = x - CAR_HEIGHT;
         car->y[1] = y - CAR_WIDTH;
@@ -757,6 +869,7 @@ void init_car(Tcar* car)
     car->turn = false;
     car->direction = rand() % 2 + 1;
     if (map_2 == true) car->direction = rand() % 4 + 1;
+    if (map_3 == true) car->direction = rand() % 6 + 1;
     car->line = rand() % 3 + 1;
     if (add_car == true)
     {   
@@ -795,15 +908,45 @@ void init_car(Tcar* car)
     }
     else if (car->direction == 3)
     {
-        if (car->line == 1) car_coords(car, 844, 435);
-        else if (car->line == 2) car_coords(car, 844, 475);
-        else if (car->line == 3) car_coords(car, 844, 525);
+        if (map_2 == true)
+        {
+            if (car->line == 1) car_coords(car, 844, 435);
+            else if (car->line == 2) car_coords(car, 844, 475);
+            else if (car->line == 3) car_coords(car, 844, 525);
+        }
+        else if (map_3 == true)
+        {
+            car->line = rand() % 2 + 1;
+            if (car->line == 1) car_coords(car, 844, 215);
+            else if (car->line == 2) car_coords(car, 844, 255);
+        }
     }
     else if (car->direction == 4)
     {
-        if (car->line == 1) car_coords(car, -44, 296);
-        else if (car->line == 2) car_coords(car, -44, 341);
-        else if (car->line == 3) car_coords(car, -44, 386);
+        if (map_2 == true)
+        {
+            if (car->line == 1) car_coords(car, -44, 296);
+            else if (car->line == 2) car_coords(car, -44, 341);
+            else if (car->line == 3) car_coords(car, -44, 386);
+        }
+        else if (map_3 == true)
+        {
+            car->line = rand() % 2 + 1;
+            if (car->line == 1) car_coords(car, -44, 135);
+            else if (car->line == 2) car_coords(car, -44, 175);
+        }
+    }
+    else if (car->direction == 5)
+    {
+        if (car->line == 1) car_coords(car, 844, 605);
+        else if (car->line == 2) car_coords(car, 844, 640);
+        else if (car->line == 3) car_coords(car, 844, 685);
+    }
+    else if (car->direction == 6)
+    {
+        if (car->line == 1) car_coords(car, -44, 485);
+        else if (car->line == 2) car_coords(car, -44, 525);
+        else if (car->line == 3) car_coords(car, -44, 565);
     }
     car->texture_id = rand() % 19;
 }
@@ -942,8 +1085,9 @@ void model_load()
                 memset(value, 0, sizeof(value));
                 temp->car.line = str[save_i + 1] - '0';
                 save_i += 3;
+                temp->car.turn = str[save_i] - '0';
                 count = 0;
-                for (unsigned int i = save_i; i < strlen(str); i++)
+                for (unsigned int i = save_i + 2; i < strlen(str); i++)
                 {
                     save_i = i;
                     if (str[i] == ' ') break;
@@ -987,6 +1131,7 @@ void motorway()
         map_show(0);
         glutSwapBuffers();
         clock_t start = clock(), end = 0, begin = clock();
+        clock_t auto_save1 = clock(), auto_save2 = 0;
         int max_cars = 0, time = 0;
         if (Map.time != 0) time = Map.time;
         while (true)
@@ -1004,6 +1149,12 @@ void motorway()
                 //print_cars(head);
                 start = clock();
                 end = 0;
+            }
+            if (Map.autosave == true && (auto_save2 - auto_save1) / CLOCKS_PER_SEC > 30)
+            {
+                model_save(0, head);
+                auto_save1 = clock();
+                auto_save2 = 0;
             }
             map_show(0);
             Map.time = (int)((clock() - begin) / CLOCKS_PER_SEC) + time;
@@ -1040,6 +1191,7 @@ void motorway()
             check_distance(head);
             glutSwapBuffers();
             end = clock();
+            auto_save2 = clock();
             if (max_cars < Map.car_counts) max_cars = Map.car_counts;
         }
     }
@@ -1129,7 +1281,7 @@ void check_light(Cars* head)
             {
                 if (temp->car.y[0] > 575)
                 {
-                    if (abs(575 - temp->car.y[0]) < 20 && abs(575 - temp->car.y[0]) > 0)
+                    if (fabsf(575 - temp->car.y[0]) < 20 && fabsf(575 - temp->car.y[0]) > 0)
                     {
                         temp->car.speed = 0;
                     }
@@ -1160,7 +1312,7 @@ void check_light(Cars* head)
             {
                 if (temp->car.x[0] > 580)
                 {
-                    if (abs(580 - (temp->car.x[0] - CAR_HEIGHT)) < 20 && abs(580 - (temp->car.x[0] - CAR_HEIGHT)) > 0)
+                    if (fabsf(580 - (temp->car.x[0] - CAR_HEIGHT)) < 20 && fabsf(580 - (temp->car.x[0] - CAR_HEIGHT)) > 0)
                     {
                         temp->car.speed = 0;
                     }
@@ -1202,6 +1354,7 @@ void crossroad()
         map_show(1);
         glutSwapBuffers();
         clock_t start = clock(), end = 0, begin = clock(), traffic1 = clock(), traffic2 = 0;
+        clock_t auto_save1 = clock(), auto_save2 = 0;
         int max_cars = 0, time = 0;
         if (Map.time != 0) time = Map.time;
         while (true)
@@ -1226,6 +1379,12 @@ void crossroad()
                 else traffic_light1 = true, traffic_light2 = false;
                 traffic1 = clock();
                 traffic2 = 0;
+            }
+            if (Map.autosave == true && (auto_save2 - auto_save1) / CLOCKS_PER_SEC > 30)
+            {
+                model_save(1, head);
+                auto_save1 = clock();
+                auto_save2 = 0;
             }
             map_show(1);
             traffic_lights();
@@ -1287,10 +1446,146 @@ void crossroad()
             glutSwapBuffers();
             end = clock();
             traffic2 = clock();
+            auto_save2 = clock();
             if (max_cars < Map.car_counts) max_cars = Map.car_counts;
         }
     }
     if (pause_active == true) pause(1, head, false);
+}
+
+void mult_traffic_lights()
+{
+    if (traffic_light1 == true && traffic_light2 == false)
+    {
+        light_draw(567, 765, 745, 724, true);
+        light_draw(566, 502, 482, 461, false);
+        light_draw(568, 416, 395, 375, true);
+        light_draw(580, 78, 58, 37, false);
+
+        light_draw(231, 765, 745, 724, false);
+        light_draw(230, 502, 482, 461, true);
+        light_draw(231, 416, 395, 375, false);
+        light_draw(228, 78, 58, 37, true);
+    }
+    else if (traffic_light1 == false && traffic_light2 == true)
+    {
+        light_draw(567, 765, 745, 724, false);
+        light_draw(566, 502, 482, 461, true);
+        light_draw(568, 416, 395, 375, false);
+        light_draw(580, 78, 58, 37, true);
+
+        light_draw(231, 765, 745, 724, true);
+        light_draw(230, 502, 482, 461, false);
+        light_draw(231, 416, 395, 375, true);
+        light_draw(228, 78, 58, 37, false);
+    }
+}
+
+void mult_check_light(Cars* head)
+{
+    Cars* temp = head;
+    if (traffic_light1 == false && traffic_light2 == true)
+    {
+        while (temp != NULL)
+        {
+            if (temp->car.direction == 3 || temp->car.direction == 4 || temp->car.direction == 5 || temp->car.direction == 6)
+            {
+                if (temp->car.speed == 0)
+                {
+                    temp->car.speed = rand() % 30;
+                    temp->car.speed += 60;
+                }
+                temp->car.speed += 0.0025;
+            }
+            else if (temp->car.direction == 1)
+            {
+                if (temp->car.y[0] < 85)
+                {
+                    if (85 - (temp->car.y[0] + CAR_HEIGHT) < 20 && 85 - (temp->car.y[0] + CAR_HEIGHT) > 0) temp->car.speed = 0;
+                    else
+                    {
+                        if (temp->car.speed > 5) temp->car.speed -= 0.0015;
+                    }
+                }
+                else if (temp->car.y[0] > 280 && temp->car.y[0] < 420)
+                {
+                    if (420 - (temp->car.y[0] + CAR_HEIGHT) < 20 && 420 - (temp->car.y[0] + CAR_HEIGHT) > 0) temp->car.speed = 0;
+                    else
+                    {
+                        if (temp->car.speed > 5) temp->car.speed -= 0.0015;
+                    }
+                }
+                else temp->car.speed += 0.025;
+            }
+            else if (temp->car.direction == 2)
+            {
+                if (temp->car.y[0] > 725)
+                {
+                    if (fabsf(725 - temp->car.y[0]) < 20 && fabsf(725 - temp->car.y[0]) > 0) temp->car.speed = 0;
+                    else
+                    {
+                        if (temp->car.speed > 5) temp->car.speed -= 0.0015;
+                    }
+                }
+                else if (temp->car.y[0] > 280 && temp->car.y[0] < 420)
+                {
+                    if (fabsf(280 - temp->car.y[0]) < 20 && fabsf(280 - temp->car.y[0]) > 0) temp->car.speed = 0;
+                    else
+                    {
+                        if (temp->car.speed > 5) temp->car.speed -= 0.0015;
+                    }
+                }
+                else temp->car.speed += 0.025;
+            }
+            temp = temp->next_car;
+        }
+    }
+    else if (traffic_light1 == true && traffic_light2 == false)
+    {
+        while (temp != NULL)
+        {
+            if (temp->car.direction == 1 || temp->car.direction == 2)
+            {
+                if (temp->car.speed == 0)
+                {
+                    temp->car.speed = rand() % 30;
+                    temp->car.speed += 60;
+                }
+                temp->car.speed += 0.0025;
+            }
+            else if (temp->car.direction == 3 || temp->car.direction == 5)
+            {
+                if (temp->car.x[0] > 575)
+                {
+                    if (fabsf(575 - (temp->car.x[0] - CAR_HEIGHT)) < 20 && fabsf(575 - (temp->car.x[0] - CAR_HEIGHT)) > 0)
+                    {
+                        temp->car.speed = 0;
+                    }
+                    else
+                    {
+                        if (temp->car.speed > 5) temp->car.speed -= 0.0015;
+                    }
+                }
+                else temp->car.speed += 0.025;
+            }
+            else if (temp->car.direction == 4 || temp->car.direction == 6)
+            {
+                if (temp->car.x[0] < 240)
+                {
+                    if (240 - (temp->car.x[0]) < 20 && 240 - (temp->car.x[0]) > 0)
+                    {
+                        temp->car.speed = 0;
+                    }
+                    else
+                    {
+                        if (temp->car.speed > 5) temp->car.speed -= 0.0015;
+                    }
+                }
+                else temp->car.speed += 0.025;
+            }
+            temp = temp->next_car;
+        }
+    }
 }
 
 void mult_crossroad()
@@ -1298,10 +1593,15 @@ void mult_crossroad()
     map_1 = false, map_2 = false, map_3 = true;
     if (model_active == true)
     {
+        if (head == NULL) head = create_car();
         glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
         glClear(GL_COLOR_BUFFER_BIT);
         map_show(2);
         glutSwapBuffers();
+        clock_t start = clock(), end = 0, begin = clock(), traffic1 = clock(), traffic2 = 0;
+        clock_t auto_save1 = clock(), auto_save2 = 0;
+        int max_cars = 0, time = 0;
+        if (Map.time != 0) time = Map.time;
         while (true)
         {
             if (GetAsyncKeyState(VK_SPACE) & 0x1) change_line(2, head);
@@ -1311,11 +1611,83 @@ void mult_crossroad()
                 pause_active = true;
                 break;
             }
+            if ((traffic2 - traffic1) / CLOCKS_PER_SEC > 15)
+            {
+                if (traffic_light1 == true) traffic_light1 = false, traffic_light2 = true;
+                else traffic_light1 = true, traffic_light2 = false;
+                traffic1 = clock();
+                traffic2 = 0;
+            }
+            if ((end - start) / CLOCKS_PER_SEC > Map.interval)
+            {
+                push_car(head);
+                start = clock();
+                end = 0;
+            }
             map_show(2);
+            mult_traffic_lights();
+            Map.time = (int)((clock() - begin) / CLOCKS_PER_SEC) + time;
+            info(max_cars, head);
+            Cars* tmp = head, * ptr = NULL;
+            while (tmp != NULL)
+            {
+                car_draw(&tmp->car);
+                if (tmp->car.direction == 1)
+                {
+                    if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 3000;
+                    else
+                    {
+                        if (tmp == head) head = delete_headcar(head);
+                        else ptr->next_car = delete_car(tmp, head);
+                        Map.car_counts--;
+                        break;
+                    }
+                }
+                else if (tmp->car.direction == 2)
+                {
+                    if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 3000;
+                    else
+                    {
+                        if (tmp == head) head = delete_headcar(head);
+                        else ptr->next_car = delete_car(tmp, head);
+                        Map.car_counts--;
+                        break;
+                    }
+                }
+                else if (tmp->car.direction == 3 || tmp->car.direction == 5)
+                {
+                    if (tmp->car.x[0] > -44) tmp->car.x[0] -= tmp->car.speed / 3000;
+                    else
+                    {
+                        if (tmp == head) head = delete_headcar(head);
+                        else ptr->next_car = delete_car(tmp, head);
+                        Map.car_counts--;
+                        break;
+                    }
+                }
+                else if (tmp->car.direction == 4 || tmp->car.direction == 6)
+                {
+                    if (tmp->car.x[0] < 844) tmp->car.x[0] += tmp->car.speed / 3000;
+                    else
+                    {
+                        if (tmp == head) head = delete_headcar(head);
+                        else ptr->next_car = delete_car(tmp, head);
+                        Map.car_counts--;
+                        break;
+                    }
+                }
+                ptr = tmp;
+                tmp = tmp->next_car;
+            }
+            mult_check_light(head);
+            check_distance(head);
             glutSwapBuffers();
+            end = clock();
+            traffic2 = clock();
+            if (max_cars < Map.car_counts) max_cars = Map.car_counts;
         }
     }
-    if (pause_active == true) pause(2, NULL, false);
+    if (pause_active == true) pause(2, head, false);
 }
 
 void menu_buttons(struct menu_button* button, int h)
@@ -1759,7 +2131,7 @@ void special_keyboard(int key, int x, int y)
         {
             if (map_1 == true) model_save(0, head);
             else if (map_2 == true) model_save(1, head);
-            else if (map_3 == true) model_save(2, NULL);
+            else if (map_3 == true) model_save(2, head);
         }
         if (key == GLUT_KEY_F3)
         {
