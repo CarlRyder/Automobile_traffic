@@ -146,10 +146,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="autotraffic.c" />
+    <ClCompile Include="cars.c" />
+    <ClCompile Include="check.c" />
+    <ClCompile Include="maps.c" />
+    <ClCompile Include="menu.c" />
+    <ClCompile Include="moves.c" />
+    <ClCompile Include="objects.c" />
+    <ClCompile Include="textures.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cars.h" />
+    <ClInclude Include="check.h" />
     <ClInclude Include="defines.h" />
+    <ClInclude Include="maps.h" />
+    <ClInclude Include="menu.h" />
+    <ClInclude Include="moves.h" />
+    <ClInclude Include="objects.h" />
     <ClInclude Include="pincludes.h" />
+    <ClInclude Include="textures.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
