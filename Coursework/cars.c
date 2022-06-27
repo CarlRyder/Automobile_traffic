@@ -57,8 +57,8 @@ void init_car(car_model* car)
             else if (car->direction == 1) car->line = model.line - 3;
             else if (car->direction == 4) car->line = model.line - 6;
             else if (car->direction == 3) car->line = model.line - 8;
-            else if (car->direction == 4) car->line = model.line - 10;
-            else if (car->direction == 3) car->line = model.line - 13;
+            else if (car->direction == 6) car->line = model.line - 10;
+            else if (car->direction == 5) car->line = model.line - 13;
         }
     }
     car->speed = rand() % 90;
@@ -108,7 +108,7 @@ void init_car(car_model* car)
     else if (car->direction == 5)
     {
         if (car->line == 1) car_coords(car, 844, 605);
-        else if (car->line == 2) car_coords(car, 844, 640);
+        else if (car->line == 2) car_coords(car, 844, 643);
         else if (car->line == 3) car_coords(car, 844, 685);
     }
     else if (car->direction == 6)

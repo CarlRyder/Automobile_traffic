@@ -115,6 +115,22 @@ void change_line(int map, Cars* head)
     }
 }
 
+void start_car(Cars* head)
+{
+    Cars* temp = head;
+    while (temp != NULL)
+    {
+        if (temp->car.stop == true && temp->car.speed == 0)
+        {
+            temp->car.speed = rand() % 30;
+            temp->car.speed += 60;
+            temp->car.stop = false;
+            break;
+        }
+        temp = temp->next_car;
+    }
+}
+
 void stop_car(Cars* head)
 {
     Cars* temp = head;
@@ -250,110 +266,79 @@ void check_light(Cars* head)
 
 void check_cars(Cars* head)
 {
-    if (enable.map_2 == true)
+    Cars* temp = head, * ptr = head;
+    while (temp != NULL)
     {
-        Cars* temp = head, * ptr = head;
-        while (temp != NULL)
+        if (temp->car.direction == 1)
         {
-            if (temp->car.direction == 1)
+            while (ptr != NULL)
             {
-                while (ptr != NULL)
+                if (ptr->car.direction == 3 || ptr->car.direction == 4 || ptr->car.direction == 5 || ptr->car.direction == 6)
                 {
-                    if (ptr->car.direction == 4)
+                    if ((temp->car.y[0] + CAR_HEIGHT) - (ptr->car.y[0] - CAR_WIDTH) < 0 && fabsf((temp->car.y[0] + CAR_HEIGHT) - (ptr->car.y[0] - CAR_WIDTH)) <= CAR_WIDTH / 2)
                     {
-                        if ((ptr->car.y[0] - CAR_WIDTH) - (temp->car.y[0] + CAR_HEIGHT) < 21 && temp->car.x[0] < ptr->car.x[0] + CAR_WIDTH && temp->car.x[0] > ptr->car.x[0] - (CAR_HEIGHT + CAR_WIDTH))
+                        if ((ptr->car.x[0] - CAR_HEIGHT) - (temp->car.x[0] + CAR_WIDTH) < 0 && fabsf((ptr->car.x[0] - CAR_HEIGHT) - (temp->car.x[0] + CAR_WIDTH)) <= CAR_WIDTH + CAR_HEIGHT)
                         {
-                            printf("1\n");
                             temp->car.speed = 0;
                         }
                     }
-                    else if (ptr->car.direction == 3)
-                    {
-                        if ((ptr->car.y[0] - CAR_WIDTH) - (temp->car.y[0] + CAR_HEIGHT) < 21 && temp->car.x[0] < ptr->car.x[0] + CAR_WIDTH && temp->car.x[0] > ptr->car.x[0] + (CAR_HEIGHT + CAR_WIDTH))
-                        {
-                            printf("2\n");
-                            temp->car.speed = 0;
-                        }
-                    }
-                    ptr = ptr->next_car;
                 }
+                ptr = ptr->next_car;
             }
-            else if (temp->car.direction == 2)
-            {
-                while (ptr != NULL)
-                {
-                    if (ptr->car.direction == 4)
-                    {
-                        if (fabsf(ptr->car.y[0] - temp->car.y[0]) < 21 && temp->car.x[0] < ptr->car.x[0] + CAR_WIDTH && temp->car.x[0] > ptr->car.x[0] - (CAR_HEIGHT + CAR_WIDTH))
-                        {
-                            printf("3\n");
-                            temp->car.speed = 0;
-                        }
-                    }
-                    else if (ptr->car.direction == 3)
-                    {
-                        if (fabsf(ptr->car.y[0] - temp->car.y[0]) < 21 && temp->car.x[0] < ptr->car.x[0] + CAR_WIDTH && temp->car.x[0] > ptr->car.x[0] + (CAR_HEIGHT + CAR_WIDTH))
-                        {
-                            printf("4\n");
-                            temp->car.speed = 0;
-                        }
-                    }
-                    ptr = ptr->next_car;
-                }
-            }
-            else if (temp->car.direction == 3)
-            {
-                while (ptr != NULL)
-                {
-                    if (ptr->car.direction == 1)
-                    {
-                        if ((ptr->car.x[0] + CAR_WIDTH) - (temp->car.x[0] + CAR_HEIGHT) > 21
-                            && temp->car.y[0] > ptr->car.y[0] - CAR_WIDTH && temp->car.y[0] < ptr->car.y[0] + (CAR_HEIGHT + CAR_WIDTH))
-                        {
-                            printf("5\n");
-                            temp->car.speed = 0;
-                        }
-                    }
-                    else if (ptr->car.direction == 2)
-                    {
-                        if ((ptr->car.x[0] + CAR_WIDTH) - (temp->car.x[0] + CAR_HEIGHT) > 21
-                            && temp->car.y[0] > ptr->car.y[0] + CAR_WIDTH && temp->car.y[0] < ptr->car.y[0] - (CAR_HEIGHT + CAR_WIDTH))
-                        {
-                            printf("6\n");
-                            temp->car.speed = 0;
-                        }
-                    }
-                    ptr = ptr->next_car;
-                }
-            }
-            else if (temp->car.direction == 4)
-            {
-                while (ptr != NULL)
-                {
-                    if (ptr->car.direction == 1)
-                    {
-                        if (fabsf(ptr->car.x[0] - temp->car.x[0]) < 21
-                            && temp->car.y[0] > ptr->car.y[0] - CAR_WIDTH && temp->car.y[0] < ptr->car.y[0] + (CAR_HEIGHT + CAR_WIDTH))
-                        {
-                            printf("7\n");
-                            temp->car.speed = 0;
-                        }
-                    }
-                    else if (ptr->car.direction == 2)
-                    {
-                        if (fabsf(ptr->car.x[0] - temp->car.x[0]) < 21
-                            && temp->car.y[0] < ptr->car.y[0] - CAR_WIDTH && temp->car.y[0] > ptr->car.y[0] - (CAR_HEIGHT + CAR_WIDTH))
-                        {
-                            printf("8\n");
-                            temp->car.speed = 0;
-                        }
-                    }
-                    ptr = ptr->next_car;
-                }
-            }
-            ptr = head;
-            temp = temp->next_car;
         }
+        else if (temp->car.direction == 2)
+        {
+            while (ptr != NULL)
+            {
+                if (ptr->car.direction == 3 || ptr->car.direction == 4 || ptr->car.direction == 5 || ptr->car.direction == 6)
+                {
+                    if (temp->car.y[0] - ptr->car.y[0] > 0 && temp->car.y[0] - ptr->car.y[0] <= CAR_WIDTH / 2)
+                    {
+                        if ((ptr->car.x[0] - CAR_HEIGHT) - (temp->car.x[0] + CAR_WIDTH) < 0 && fabsf((ptr->car.x[0] - CAR_HEIGHT) - (temp->car.x[0] + CAR_WIDTH)) <= CAR_HEIGHT + CAR_WIDTH)
+                        {
+                            temp->car.speed = 0;
+                        }
+                    }
+                }
+                ptr = ptr->next_car;
+            }
+        }
+        else if (temp->car.direction == 3 || temp->car.direction == 5)
+        {
+            while (ptr != NULL)
+            {
+                if (ptr->car.direction == 1 || ptr->car.direction == 2)
+                {
+                    if ((temp->car.x[0] - CAR_HEIGHT) - (ptr->car.x[0] + CAR_WIDTH) > 0 && (temp->car.x[0] - CAR_HEIGHT) - (ptr->car.x[0] + CAR_WIDTH) <= CAR_WIDTH / 2)
+                    {
+                        if (ptr->car.y[0] - temp->car.y[0] < 0 && fabsf(ptr->car.y[0] - temp->car.y[0]) <= CAR_HEIGHT + CAR_WIDTH)
+                        {
+                            temp->car.speed = 0;
+                        }
+                    }
+                }
+                ptr = ptr->next_car;
+            }
+        }
+        else if (temp->car.direction == 4 || temp->car.direction == 6)
+        {
+            while (ptr != NULL)
+            {
+                if (ptr->car.direction == 1 || ptr->car.direction == 2)
+                {
+                    if (temp->car.x[0] - ptr->car.x[0] < 0 && fabsf(temp->car.x[0] - ptr->car.x[0]) <= CAR_WIDTH / 2)
+                    {
+                        if (ptr->car.y[0] - temp->car.y[0] < 0 && fabsf(ptr->car.y[0] - temp->car.y[0]) <= CAR_HEIGHT + CAR_WIDTH)
+                        {
+                            temp->car.speed = 0;
+                        }
+                    }
+                }
+                ptr = ptr->next_car;
+            }
+        }
+        ptr = head;
+        temp = temp->next_car;
     }
 }
 

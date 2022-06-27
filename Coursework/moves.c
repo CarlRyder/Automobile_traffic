@@ -23,31 +23,49 @@ void fill_array_cars(Cars* tmp, unsigned short* range_dir, Cars** car_dir)
 int overtaking(int count_line, Cars** car_dir, int num_ccar, unsigned short* range_dir, int num_dir, char mode_coord)
 {
     int start_right, end_right, start_left, end_left;
-    bool possible_changing_r = false;
-    bool possible_changing_l = false;
-    bool can_changing_r = true;
-    bool can_changing_l = true;
-    int count = 0;
-    int max_count = 0;
-    if ((num_dir == 3 || num_dir == 4) && enable.map_3 == true)
+    bool possible_changing_r = false, possible_changing_l = false;
+    bool can_changing_r = true, can_changing_l = true;
+    int count = 0, max_count = 0;
+    if (count_line == 1)
     {
-        if (count_line == 1)
+        start_right = model.car_counts;
+        end_right = range_dir[1];
+        possible_changing_r = true;
+        count = 0; max_count = 1;
+    }
+    else if (count_line == 2)
+    {
+        if ((num_dir == 3 || num_dir == 4) && enable.map_3 == true)
         {
-            start_right = model.car_counts;
-            end_right = range_dir[1];
-            possible_changing_r = true;
-            count = 0;
-        }
-        else if (count_line == 2)
-        {
-            start_left = 0;
+            start_left = 0; 
             end_left = range_dir[0];
             possible_changing_l = true;
             max_count = 2;
             count = 1;
         }
-        bool possible_changing_tmp = false, can_changing_tmp = false;
-        int end_tmp = 0, start_tmp = 0;
+        else
+        {
+            start_left = 0;
+            end_left = range_dir[0];
+            start_right = model.car_counts * 2;
+            end_right = range_dir[2];
+            possible_changing_r = true;
+            possible_changing_l = true;
+            max_count = 2;
+            count = rand() % 1 + 0;
+        }
+    }
+    else if (count_line == 3)
+    {
+        start_left = model.car_counts;
+        end_left = range_dir[1];
+        possible_changing_l = true;
+        count = 1; max_count = 2;
+    }
+    bool possible_changing_tmp = false, can_changing_tmp = false;
+    int end_tmp = 0, start_tmp = 0;
+    while (count < max_count)
+    {
         if (count == 0 && possible_changing_r == true) //0 r
         {
             possible_changing_tmp = possible_changing_r;
@@ -66,87 +84,14 @@ int overtaking(int count_line, Cars** car_dir, int num_ccar, unsigned short* ran
         {
             if (end_tmp - start_tmp == 0)
             {
-                if (num_dir == 3 && count == 1) { car_dir[num_ccar]->car.y[0] = 215; car_dir[num_ccar]->car.line -= 1; }
-                else if (num_dir == 3 && count == 0) { car_dir[num_ccar]->car.y[0] = 255; car_dir[num_ccar]->car.line += 1; }
-                else if (num_dir == 4 && count == 1) { car_dir[num_ccar]->car.y[0] = 135; car_dir[num_ccar]->car.line -= 1; }
-                else if (num_dir == 4 && count == 0) { car_dir[num_ccar]->car.y[0] = 175; car_dir[num_ccar]->car.line += 1; }
-                return 1;
-            }
-            else
-            {
-                for (int num_dcar = start_tmp; num_dcar < end_tmp; num_dcar++)
-                {
-                    if (car_dir[num_dcar]->car.y[0] - car_dir[num_ccar]->car.y[0] > 0 &&
-                        car_dir[num_dcar]->car.y[0] - car_dir[num_ccar]->car.y[0] < 100.0)
-                    {
-                        can_changing_tmp = false;
-                    }
-                    if (car_dir[num_dcar]->car.y[0] - car_dir[num_ccar]->car.y[0] < 0 &&
-                        abs(car_dir[num_dcar]->car.y[0] - car_dir[num_ccar]->car.y[0]) < 100.0)
-                    {
-                        can_changing_tmp = false;
-                    }
-                }
-                if (can_changing_tmp == true)
+                if ((num_dir == 3 || num_dir == 4) && enable.map_3 == true)
                 {
                     if (num_dir == 3 && count == 1) { car_dir[num_ccar]->car.y[0] = 215; car_dir[num_ccar]->car.line -= 1; }
                     else if (num_dir == 3 && count == 0) { car_dir[num_ccar]->car.y[0] = 255; car_dir[num_ccar]->car.line += 1; }
                     else if (num_dir == 4 && count == 1) { car_dir[num_ccar]->car.y[0] = 135; car_dir[num_ccar]->car.line -= 1; }
                     else if (num_dir == 4 && count == 0) { car_dir[num_ccar]->car.y[0] = 175; car_dir[num_ccar]->car.line += 1; }
-                    return 1;
                 }
-            }
-        }
-        return 0;
-    }
-    else
-    {
-        if (count_line == 1)
-        {
-            start_right = model.car_counts;
-            end_right = range_dir[1];
-            possible_changing_r = true;
-            count = 0; max_count = 1;
-        }
-        else if (count_line == 2)
-        {
-            start_left = 0;
-            end_left = range_dir[0];
-            start_right = model.car_counts * 2;
-            end_right = range_dir[2];
-            possible_changing_r = true;
-            possible_changing_l = true;
-            max_count = 2;
-            count = rand() % 1 + 0;
-        }
-        else if (count_line == 3)
-        {
-            start_left = model.car_counts;
-            end_left = range_dir[1];
-            possible_changing_l = true;
-            count = 1; max_count = 2;
-        }
-        bool possible_changing_tmp = false, can_changing_tmp = false;
-        int end_tmp = 0, start_tmp = 0;
-        while (count < max_count)
-        {
-            if (count == 0 && possible_changing_r == true) //0 r
-            {
-                possible_changing_tmp = possible_changing_r;
-                end_tmp = end_right;
-                start_tmp = start_right;
-                can_changing_tmp = can_changing_r;
-            }
-            else if (count == 1 && possible_changing_l == true) // 1 l
-            {
-                possible_changing_tmp = possible_changing_l;
-                end_tmp = end_left;
-                start_tmp = start_left;
-                can_changing_tmp = can_changing_l;
-            }
-            if (possible_changing_tmp == true)
-            {
-                if (end_tmp - start_tmp == 0)
+                else
                 {
                     if (count_line == 2 && count == 0) //r
                     {
@@ -180,11 +125,27 @@ int overtaking(int count_line, Cars** car_dir, int num_ccar, unsigned short* ran
                         if (count == 1)  car_dir[num_ccar]->car.line -= 1;
                         else if (count == 0) car_dir[num_ccar]->car.line += 1;
                     }
-                    return 1;
                 }
-                else
+                return 1;
+            }
+            else
+            {
+                for (int num_dcar = start_tmp; num_dcar < end_tmp; num_dcar++)
                 {
-                    for (int num_dcar = start_tmp; num_dcar < end_tmp; num_dcar++)
+                    if ((num_dir == 3 || num_dir == 4) && enable.map_3 == true)
+                    {
+                        if (car_dir[num_dcar]->car.y[0] - car_dir[num_ccar]->car.y[0] > 0 &&
+                            car_dir[num_dcar]->car.y[0] - car_dir[num_ccar]->car.y[0] < 100.0)
+                        {
+                            can_changing_tmp = false;
+                        }
+                        if (car_dir[num_dcar]->car.y[0] - car_dir[num_ccar]->car.y[0] < 0 &&
+                            abs(car_dir[num_dcar]->car.y[0] - car_dir[num_ccar]->car.y[0]) < 100.0)
+                        {
+                            can_changing_tmp = false;
+                        }
+                    }
+                    else
                     {
                         if (num_dir == 1 || num_dir == 2)
                         {
@@ -199,20 +160,7 @@ int overtaking(int count_line, Cars** car_dir, int num_ccar, unsigned short* ran
                                 can_changing_tmp = false;
                             }
                         }
-                        else  if ((num_dir == 3 || num_dir == 4) && enable.map_3 == true)
-                        {
-                            if (car_dir[num_dcar]->car.x[0] - car_dir[num_ccar]->car.x[0] > 0 &&
-                                car_dir[num_dcar]->car.x[0] - car_dir[num_ccar]->car.x[0] < 100.0)
-                            {
-                                can_changing_tmp = false;
-                            }
-                            if (car_dir[num_dcar]->car.x[0] - car_dir[num_ccar]->car.x[0] < 0 &&
-                                abs(car_dir[num_dcar]->car.x[0] - car_dir[num_ccar]->car.x[0]) < 100.0)
-                            {
-                                can_changing_tmp = false;
-                            }
-                        }
-                        else  if (num_dir == 5 || num_dir == 6 || num_dir == 3 || num_dir == 4)
+                        else if (num_dir == 5 || num_dir == 6 || num_dir == 3 || num_dir == 4)
                         {
                             if (car_dir[num_dcar]->car.x[0] - car_dir[num_ccar]->car.x[0] > 0 &&
                                 car_dir[num_dcar]->car.x[0] - car_dir[num_ccar]->car.x[0] < 100.0)
@@ -226,7 +174,17 @@ int overtaking(int count_line, Cars** car_dir, int num_ccar, unsigned short* ran
                             }
                         }
                     }
-                    if (can_changing_tmp == true)
+                }
+                if (can_changing_tmp == true)
+                {
+                    if ((num_dir == 3 || num_dir == 4) && enable.map_3 == true)
+                    {
+                        if (num_dir == 3 && count == 1) { car_dir[num_ccar]->car.y[0] = 215; car_dir[num_ccar]->car.line -= 1; }
+                        else if (num_dir == 3 && count == 0) { car_dir[num_ccar]->car.y[0] = 255; car_dir[num_ccar]->car.line += 1; }
+                        else if (num_dir == 4 && count == 1) { car_dir[num_ccar]->car.y[0] = 135; car_dir[num_ccar]->car.line -= 1; }
+                        else if (num_dir == 4 && count == 0) { car_dir[num_ccar]->car.y[0] = 175; car_dir[num_ccar]->car.line += 1; }
+                    }
+                    else
                     {
                         if (count_line == 2 && count == 0) //r
                         {
@@ -256,16 +214,15 @@ int overtaking(int count_line, Cars** car_dir, int num_ccar, unsigned short* ran
                             else if (num_dir == 4 && enable.map_3 == false) car_dir[num_ccar]->car.y[0] = 341;
                             else if (num_dir == 5) car_dir[num_ccar]->car.y[0] = 640;
                             else if (num_dir == 6) car_dir[num_ccar]->car.y[0] = 525;
-
                             if (count == 1)  car_dir[num_ccar]->car.line -= 1;
                             else if (count == 0) car_dir[num_ccar]->car.line += 1;
                         }
-                        return 1;
                     }
+                    return 1;
                 }
             }
-            count++;
         }
+        count++;
     }
     return 0;
 }

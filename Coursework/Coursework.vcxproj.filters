@@ -33,9 +33,6 @@
     <ClCompile Include="moves.c">
       <Filter>Файлы ресурсов</Filter>
     </ClCompile>
-    <ClCompile Include="maps.c">
-      <Filter>Файлы ресурсов</Filter>
-    </ClCompile>
     <ClCompile Include="check.c">
       <Filter>Файлы ресурсов</Filter>
     </ClCompile>
@@ -60,9 +57,6 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="moves.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="maps.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="check.h">

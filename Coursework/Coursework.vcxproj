@@ -148,7 +148,6 @@
     <ClCompile Include="autotraffic.c" />
     <ClCompile Include="cars.c" />
     <ClCompile Include="check.c" />
-    <ClCompile Include="maps.c" />
     <ClCompile Include="menu.c" />
     <ClCompile Include="moves.c" />
     <ClCompile Include="objects.c" />
@@ -158,7 +157,6 @@
     <ClInclude Include="cars.h" />
     <ClInclude Include="check.h" />
     <ClInclude Include="defines.h" />
-    <ClInclude Include="maps.h" />
     <ClInclude Include="menu.h" />
     <ClInclude Include="moves.h" />
     <ClInclude Include="objects.h" />

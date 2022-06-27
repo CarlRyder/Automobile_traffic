@@ -28,7 +28,8 @@ struct stats
 {
     unsigned short line;
     unsigned short car_counts;
-    unsigned short time;
+    unsigned int time;
+    unsigned int stop_time;
     float interval;
     bool autosave;
     bool add_car;

@@ -144,15 +144,15 @@ void car_draw(car_model* car)
         {
             if (car->line == 3 && car->turn == false)
             {
-                if (car->y[0] > 220 && car->y[0] < 250)
+                if (car->y[0] > 230 && car->y[0] < 250)
                 {
                     car_position(car, 0, 1, true);
-                    car->x[0] += 0.02;
+                    if (active.pause_active == false) car->x[0] += 0.02;
                 }
-                else if (car->y[0] > 250)
+                else if (car->y[0] > 250 && car->y[0] < 255)
                 {
                     car->direction = 4;
-                    car->x[0] = 635;
+                    car->x[0] = 545;
                     car->y[0] = 296;
                     car->line = 1;
                     car->turn = true;
@@ -165,15 +165,15 @@ void car_draw(car_model* car)
         {
             if (car->line == 1 && car->turn == false)
             {
-                if (car->y[0] > 500 && car->y[0] < 540)
+                if (car->y[0] > 515 && car->y[0] < 535)
                 {
                     car_position(car, 1, 0, true);
-                    car->x[0] -= 0.02;
+                    if (active.pause_active == false) car->x[0] -= 0.02;
                 }
-                else if (car->y[0] < 500)
+                else if (car->y[0] < 515 && car->y[0] > 510)
                 {
                     car->direction = 3;
-                    car->x[0] = 235;
+                    car->x[0] = 275;
                     car->y[0] = 525;
                     car->line = 3;
                     car->turn = true;
@@ -186,16 +186,16 @@ void car_draw(car_model* car)
         {
             if (car->line == 3 && car->turn == false)
             {
-                if (car->x[0] > 550 && car->x[0] < 610)
+                if (car->x[0] > 560 && car->x[0] < 580)
                 {
                     car_position(car, 1, 0, false);
-                    car->y[0] += 0.02;
+                    if (active.pause_active == false) car->y[0] += 0.02;
                 }
-                else if (car->x[0] < 550)
+                else if (car->x[0] < 560 && car->x[0] > 555)
                 {
                     car->direction = 1;
                     car->x[0] = 510;
-                    car->y[0] = 575;
+                    car->y[0] = 540;
                     car->line = 3;
                     car->turn = true;
                 }
@@ -207,16 +207,16 @@ void car_draw(car_model* car)
         {
             if (car->line == 1 && car->turn == false)
             {
-                if (car->x[0] > 260 && car->x[0] < 290)
+                if (car->x[0] > 280 && car->x[0] < 300)
                 {
                     car_position(car, 0, 1, false);
-                    car->y[0] -= 0.02;
+                    if (active.pause_active == false) car->y[0] -= 0.02;
                 }
-                else if (car->x[0] > 290)
+                else if (car->x[0] > 300 && car->x[0] < 305)
                 {
                     car->direction = 2;
                     car->x[0] = 283;
-                    car->y[0] = 225;
+                    car->y[0] = 245;
                     car->line = 1;
                     car->turn = true;
                 }
@@ -227,12 +227,158 @@ void car_draw(car_model* car)
     }
     else if (enable.map_3 == true)
     {
-        if (car->direction == 1) car_position(car, 0, 1, true);
-        else if (car->direction == 2) car_position(car, 1, 0, true);
-        else if (car->direction == 3) car_position(car, 1, 0, false);
-        else if (car->direction == 4) car_position(car, 0, 1, false);
-        else if (car->direction == 5) car_position(car, 1, 0, false);
-        else if (car->direction == 6) car_position(car, 0, 1, false);
+        if (car->direction == 1)
+        {
+            if (car->line == 3)
+            {
+                if (car->y[0] > 60 && car->y[0] < 80)
+                {
+                    car_position(car, 0, 1, true);
+                    if (active.pause_active == false) car->x[0] += 0.02;
+                }
+                else if (car->y[0] > 80 && car->y[0] < 85)
+                {
+                    car->direction = 4;
+                    car->x[0] = 560;
+                    car->y[0] = 135;
+                    car->line = 1;
+                    car->turn = true;
+                }
+                else if (car->y[0] > 420 && car->y[0] < 440)
+                {
+                    car_position(car, 0, 1, true);
+                    if (active.pause_active == false) car->x[0] += 0.02;
+                }
+                else if (car->y[0] > 440 && car->y[0] < 445)
+                {
+                    car->direction = 6;
+                    car->x[0] = 560;
+                    car->y[0] = 485;
+                    car->line = 1;
+                    car->turn = true;
+                }
+                else car_position(car, 0, 1, true);
+            }
+            else car_position(car, 0, 1, true);
+        }
+        else if (car->direction == 2)
+        {
+            if (car->line == 1)
+            {
+                if (car->y[0] + CAR_HEIGHT > 725 && car->y[0] + CAR_HEIGHT < 745)
+                {
+                    car_position(car, 1, 0, true);
+                    if (active.pause_active == false) car->x[0] -= 0.02;
+                }
+                else if (car->y[0] + CAR_HEIGHT < 725 && car->y[0] + CAR_HEIGHT > 720)
+                {
+                    car->direction = 5;
+                    car->x[0] = 270;
+                    car->y[0] = 685;
+                    car->line = 3;
+                    car->turn = true;
+                }
+                else if (car->y[0] + CAR_HEIGHT > 280 && car->y[0] + CAR_HEIGHT < 300)
+                {
+                    car_position(car, 1, 0, true);
+                    if (active.pause_active == false) car->x[0] -= 0.02;
+                }
+                else if (car->y[0] + CAR_HEIGHT < 280 && car->y[0] + CAR_HEIGHT > 275)
+                {
+                    car->direction = 3;
+                    car->x[0] = 270;
+                    car->y[0] = 255;
+                    car->line = 2;
+                    car->turn = true;
+                }
+                else car_position(car, 1, 0, true);
+            }
+            else car_position(car, 1, 0, true);
+        }
+        else if (car->direction == 3)
+        {
+            if (car->line == 2)
+            {
+                if (car->x[0] > 550 && car->x[0] < 570)
+                {
+                    car_position(car, 1, 0, false);
+                    if (active.pause_active == false) car->y[0] += 0.02;
+                }
+                else if (car->x[0] < 550 && car->x[0] > 545)
+                {
+                    car->direction = 1;
+                    car->x[0] = 510;
+                    car->y[0] = 240;
+                    car->line = 3;
+                    car->turn = true;
+                }
+                else car_position(car, 1, 0, false);
+            }
+            else car_position(car, 1, 0, false);
+        }
+        else if (car->direction == 4)
+        {
+            if (car->line == 1)
+            {
+                if (car->x[0] > 280 && car->x[0] < 300)
+                {
+                    car_position(car, 0, 1, false);
+                    if (active.pause_active == false) car->y[0] -= 0.02;
+                }
+                else if (car->x[0] > 300 && car->x[0] < 305)
+                {
+                    car->direction = 2;
+                    car->x[0] = 283;
+                    car->y[0] = 100;
+                    car->line = 1;
+                    car->turn = true;
+                }
+                else car_position(car, 0, 1, false);
+            }
+            else car_position(car, 0, 1, false);
+        }
+        else if (car->direction == 5)
+        {
+            if (car->line == 3)
+            {
+                if (car->x[0] > 550 && car->x[0] < 570)
+                {
+                    car_position(car, 1, 0, false);
+                    if (active.pause_active == false) car->y[0] += 0.02;
+                }
+                else if (car->x[0] < 550 && car->x[0] > 545)
+                {
+                    car->direction = 1;
+                    car->x[0] = 510;
+                    car->y[0] = 695;
+                    car->line = 3;
+                    car->turn = true;
+                }
+                else car_position(car, 1, 0, false);
+            }
+            else car_position(car, 1, 0, false);
+        }
+        else if (car->direction == 6)
+        {
+            if (car->line == 1)
+            {
+                if (car->x[0] > 290 && car->x[0] < 310)
+                {
+                    car_position(car, 0, 1, false);
+                    if (active.pause_active == false) car->y[0] -= 0.02;
+                }
+                else if (car->x[0] > 310 && car->x[0] < 315)
+                {
+                    car->direction = 2;
+                    car->x[0] = 283;
+                    car->y[0] = 450;
+                    car->line = 1;
+                    car->turn = true;
+                }
+                else car_position(car, 0, 1, false);
+            }
+            else car_position(car, 0, 1, false);
+        }
     }
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);

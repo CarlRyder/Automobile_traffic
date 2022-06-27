@@ -9,7 +9,6 @@
 
 GLint Width = 800, Height = 800;
 
-/* Definition of functions */
 void model_save(int map);
 void model_load();
 void motorway();
@@ -21,7 +20,6 @@ void mouse_pressed(int button, int state, int x, int y);
 void keyboard(unsigned char key, int x, int y);
 void special_keyboard(int key, int x, int y);
 void struct_init();
-/* ----------------------- */
 
 int main()
 {
@@ -32,6 +30,8 @@ int main()
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
     glutCreateWindow(WINDOW_NAME);
     struct_init();
+    //FreeConsole();
+    sndPlaySound(L"sound/Main.wav", SND_ASYNC);
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutMouseFunc(mouse_pressed);
@@ -58,6 +58,7 @@ void struct_init()
     model.add_car = false;
     model.traffic_light1 = true;
     model.traffic_light2 = false;
+    model.stop_time = 0;
 }
 
 Cars* head_car = NULL;
@@ -181,8 +182,9 @@ void motorway()
         map_show(0);
         glutSwapBuffers();
         clock_t start = clock(), end = 0, begin = clock();
-        clock_t auto_save1 = clock(), auto_save2 = 0;
+        clock_t auto_save1 = clock(), auto_save2 = 0, stop_timer1 = 0, stop_timer2 = 0;
         int max_cars = 0, time = 0;
+        bool flag_stop = false;
         if (model.time != 0) time = model.time;
         while (true)
         {
@@ -193,19 +195,33 @@ void motorway()
                 active.pause_active = true;
                 break;
             }
-            if (GetAsyncKeyState(VK_F5) & 0x1) stop_car(head_car);
+            if (GetAsyncKeyState(VK_F5) & 0x1)
+            {
+                stop_car(head_car);
+                flag_stop = true;
+                stop_timer1 = clock();
+                stop_timer2 = 0;
+            }
             if ((end - start) / CLOCKS_PER_SEC > model.interval)
             {
                 push_car(head_car);
                 start = clock();
                 end = 0;
-            }
-            if (model.autosave == true && (auto_save2 - auto_save1) / CLOCKS_PER_SEC > 30)
+            }  
+            if (model.autosave == true && (auto_save2 - auto_save1) / CLOCKS_PER_SEC > AUTOSAVE_INTERVAL)
             {
                 model_save(0);
                 auto_save1 = clock();
                 auto_save2 = 0;
             }
+            if ((stop_timer2 - stop_timer1) / CLOCKS_PER_SEC > STOP_CAR_INTERVAL)
+            {
+                start_car(head_car);
+                flag_stop = false;
+                stop_timer1 = 0;
+                stop_timer2 = 0;
+            }
+            
             map_show(0);
             model.time = (int)((clock() - begin) / CLOCKS_PER_SEC) + time;
             info(max_cars, head_car);
@@ -242,6 +258,7 @@ void motorway()
             glutSwapBuffers();
             end = clock();
             auto_save2 = clock();
+            if (flag_stop == true) stop_timer2 = clock();
             if (max_cars < model.car_counts) max_cars = model.car_counts;
         }
     }
@@ -261,8 +278,9 @@ void crossroad()
         map_show(1);
         glutSwapBuffers();
         clock_t start = clock(), end = 0, begin = clock(), traffic1 = clock(), traffic2 = 0;
-        clock_t auto_save1 = clock(), auto_save2 = 0;
+        clock_t auto_save1 = clock(), auto_save2 = 0, stop_timer1 = 0, stop_timer2 = 0;
         int max_cars = 0, time = 0;
+        bool flag_stop = false;
         if (model.time != 0) time = model.time;
         while (true)
         {
@@ -276,6 +294,9 @@ void crossroad()
             if (GetAsyncKeyState(VK_F5) & 0x1)
             {
                 stop_car(head_car);
+                flag_stop = true;
+                stop_timer1 = clock();
+                stop_timer2 = 0;
             }
             if ((end - start) / CLOCKS_PER_SEC > model.interval)
             {
@@ -283,18 +304,25 @@ void crossroad()
                 start = clock();
                 end = 0;
             }
-            if ((traffic2 - traffic1) / CLOCKS_PER_SEC > 15)
+            if ((traffic2 - traffic1) / CLOCKS_PER_SEC > TRAFFIC_LIGHT_INTERVAL)
             {
                 if (model.traffic_light1 == true) model.traffic_light1 = false, model.traffic_light2 = true;
                 else model.traffic_light1 = true, model.traffic_light2 = false;
                 traffic1 = clock();
                 traffic2 = 0;
             }
-            if (model.autosave == true && (auto_save2 - auto_save1) / CLOCKS_PER_SEC > 30)
+            if (model.autosave == true && (auto_save2 - auto_save1) / CLOCKS_PER_SEC > AUTOSAVE_INTERVAL)
             {
                 model_save(1);
                 auto_save1 = clock();
                 auto_save2 = 0;
+            }
+            if ((stop_timer2 - stop_timer1) / CLOCKS_PER_SEC > STOP_CAR_INTERVAL)
+            {
+                start_car(head_car);
+                flag_stop = false;
+                stop_timer1 = 0;
+                stop_timer2 = 0;
             }
             map_show(1);
             traffic_lights();
@@ -358,6 +386,7 @@ void crossroad()
             end = clock();
             traffic2 = clock();
             auto_save2 = clock();
+            if (flag_stop == true) stop_timer2 = clock();
             if (max_cars < model.car_counts) max_cars = model.car_counts;
         }
     }
@@ -377,9 +406,10 @@ void mult_crossroad()
         map_show(2);
         glutSwapBuffers();
         clock_t start = clock(), end = 0, begin = clock(), traffic1 = clock(), traffic2 = 0;
-        clock_t auto_save1 = clock(), auto_save2 = 0;
-        int max_cars = 0, time = 0, save_dir = 0, save_line = 0;
+        clock_t auto_save1 = clock(), auto_save2 = 0, stop_timer1 = 0, stop_timer2 = 0;;
+        int max_cars = 0, time = 0, save_dir = 0, save_line = 0, stop_time = 0;
         float save_x = 0, save_y = 0;
+        bool flag_stop = false;
         if (model.time != 0) time = model.time;
         while (true)
         {
@@ -393,8 +423,11 @@ void mult_crossroad()
             if (GetAsyncKeyState(VK_F5) & 0x1)
             {
                 stop_car(head_car);
+                flag_stop = true;
+                stop_timer1 = clock();
+                stop_timer2 = 0;
             }
-            if ((traffic2 - traffic1) / CLOCKS_PER_SEC > 15)
+            if ((traffic2 - traffic1) / CLOCKS_PER_SEC > TRAFFIC_LIGHT_INTERVAL)
             {
                 if (model.traffic_light1 == true) model.traffic_light1 = false, model.traffic_light2 = true;
                 else model.traffic_light1 = true, model.traffic_light2 = false;
@@ -406,6 +439,19 @@ void mult_crossroad()
                 push_car(head_car);
                 start = clock();
                 end = 0;
+            }
+            if (model.autosave == true && (auto_save2 - auto_save1) / CLOCKS_PER_SEC > AUTOSAVE_INTERVAL)
+            {
+                model_save(2);
+                auto_save1 = clock();
+                auto_save2 = 0;
+            }
+            if ((stop_timer2 - stop_timer1) / CLOCKS_PER_SEC > STOP_CAR_INTERVAL)
+            {
+                start_car(head_car);
+                flag_stop = false;
+                stop_timer1 = 0;
+                stop_timer2 = 0;
             }
             map_show(2);
             mult_traffic_lights();
@@ -480,6 +526,8 @@ void mult_crossroad()
             glutSwapBuffers();
             end = clock();
             traffic2 = clock();
+            auto_save2 = clock();
+            if (flag_stop == true) stop_timer2 = clock();
             if (max_cars < model.car_counts) max_cars = model.car_counts;
         }
     }
@@ -583,6 +631,7 @@ void mouse_pressed(int button, int state, int x, int y)
             }
             else if (x >= MENU_BUTTON_LEFT && x <= MENU_BUTTON_RIGHT && y >= 275 && y <= 325)
             {
+                sndPlaySound(L"sound/null.wav", SND_ASYNC);
                 model.time = 0;
                 model.line = 1;
                 buttons.map_button = false;
@@ -591,6 +640,7 @@ void mouse_pressed(int button, int state, int x, int y)
             }
             else if (x >= MENU_BUTTON_LEFT && x <= MENU_BUTTON_RIGHT && y >= 350 && y <= 400)
             {
+                sndPlaySound(L"sound/null.wav", SND_ASYNC);
                 model.time = 0;
                 model.line = 1;
                 buttons.map_button = false;
@@ -599,6 +649,7 @@ void mouse_pressed(int button, int state, int x, int y)
             }
             else if (x >= MENU_BUTTON_LEFT && x <= MENU_BUTTON_RIGHT && y >= 425 && y <= 475)
             {
+                sndPlaySound(L"sound/null.wav", SND_ASYNC);
                 model.time = 0;
                 model.line = 1;
                 buttons.map_button = false;
@@ -607,10 +658,11 @@ void mouse_pressed(int button, int state, int x, int y)
             }
             else if (x >= MENU_BUTTON_LEFT && x <= MENU_BUTTON_RIGHT && y >= 500 && y <= 550)
             {
+                sndPlaySound(L"sound/null.wav", SND_ASYNC);
                 model.time = 0;
                 model.line = 1;
                 buttons.map_button = false;
-                model_load();
+                model_load(head_car);
             }
         }
     }
@@ -640,6 +692,7 @@ void special_keyboard(int key, int x, int y)
             head_car = remove_all(head_car);
             model.car_counts = 0;
             active.pause_active = false;
+            sndPlaySound(L"sound/Main.wav", SND_ASYNC);
             display();
         }
         if (key == GLUT_KEY_F2)
