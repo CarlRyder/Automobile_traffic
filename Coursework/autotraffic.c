@@ -6,7 +6,7 @@
 #include "defines.h"
 #include "textures.h"
 #include "check.h"
-
+//coord
 GLint Width = 800, Height = 800;
 
 void model_save(int map);
