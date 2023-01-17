@@ -346,9 +346,15 @@ void check_distance(Cars* head)
                     }
                 }
             }
-            count_line++;
+            _asm
+            {
+                inc count_line
+            }
         }
-        count_dir++;
+        _asm
+        {
+            inc count_dir
+        }
     }
     free(car_dir_1);
     free(car_dir_2);

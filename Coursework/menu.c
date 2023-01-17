@@ -143,10 +143,18 @@ void draw_mini_buttons(int w, int h, int flag)
     glEnd();
     if (h == 365)
     {
+        int coord_calc = 0, constant = MINI_BUTTON_WIDTH;
+        _asm
+        {
+            mov eax, constant
+            sar eax, 1
+            mov coord_calc, eax
+            sub coord_calc, 18
+        }
         glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
-        if (w == 0) drawstring(w + MID_COORD + (MINI_BUTTON_WIDTH >> 1) - 18, WINDOW_HEIGHT - h + 4, "0.75");
-        else if (w == 90) drawstring(w + MID_COORD + (MINI_BUTTON_WIDTH >> 1) - 5, WINDOW_HEIGHT - h + 4, "1");
-        else if (w == 180) drawstring(w + MID_COORD + (MINI_BUTTON_WIDTH >> 1) - 18, WINDOW_HEIGHT - h + 4, "1.25");
+        if (w == 0) drawstring(w + MID_COORD + coord_calc, WINDOW_HEIGHT - h + 4, "0.75");
+        else if (w == 90) drawstring(w + MID_COORD + coord_calc + 13, WINDOW_HEIGHT - h + 4, "1");
+        else if (w == 180) drawstring(w + MID_COORD + coord_calc, WINDOW_HEIGHT - h + 4, "1.25");
     }
     else if (h == 395)
     {
