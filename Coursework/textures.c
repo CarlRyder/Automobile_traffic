@@ -5,6 +5,8 @@
 
 #define INDEX_FIRST 16
 #define INDEX_SECOND 17
+#define CAR_DATA_SIZE 3168
+#define MAP_DATA_SIZE 1920000
 
 void get_car_texture()
 {
@@ -24,8 +26,7 @@ void get_car_texture()
             path[INDEX_FIRST] = '2';
             path[INDEX_SECOND] = '0';
         }
-        int width = 24, height = 44, num_color = 3;
-        unsigned char* data = (unsigned char*)malloc(width * height * num_color);
+        unsigned char* data = (unsigned char*)malloc(CAR_DATA_SIZE);
         if (data != NULL)
         {
             FILE* texture_file = fopen(path, "rb");
@@ -34,13 +35,11 @@ void get_car_texture()
                 printf("There is no files with cars textures in the directory!\n");
                 exit(0);
             }
-            int i = 0;
             unsigned char part[2] = { 0 };
-            while (i < width * height * num_color)
+            for (int i = 0; i < CAR_DATA_SIZE; i++)
             {
                 fgets(part, 2, texture_file);
                 data[i] = part[0];
-                i++;
             }
             fclose(texture_file);
             glGenTextures(1, &car_tex.texture[car_count - 1]);
@@ -50,7 +49,7 @@ void get_car_texture()
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            gluBuild2DMipmaps(GL_TEXTURE_2D, 3, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+            gluBuild2DMipmaps(GL_TEXTURE_2D, 3, 24, 44, GL_RGB, GL_UNSIGNED_BYTE, data);
             free(data);
         }
         else
@@ -64,8 +63,7 @@ void get_car_texture()
 GLuint get_map_texture(char* filename)
 {
     GLuint texture = 0;
-    int num_color = 3;
-    unsigned char* data = (unsigned char*)malloc(WINDOW_WIDTH * WINDOW_HEIGHT * num_color * sizeof(unsigned char));
+    unsigned char* data = (unsigned char*)malloc(MAP_DATA_SIZE);
     if (data != NULL)
     {
         FILE* texture_file = fopen(filename, "rb");
@@ -74,13 +72,11 @@ GLuint get_map_texture(char* filename)
             printf("There is no file with map textures in the directory!\n");
             exit(0);
         }
-        int i = 0;
         unsigned char part[2] = { 0 };
-        while (i < WINDOW_WIDTH * WINDOW_HEIGHT * num_color)
+        for (int i = 0; i < MAP_DATA_SIZE; i++)
         {
             fgets(part, 2, texture_file);
             data[i] = part[0];
-            i++;
         }
         fclose(texture_file);
         glGenTextures(1, &texture);

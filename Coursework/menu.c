@@ -50,16 +50,16 @@ void processing_buttons(int button)
         glClear(GL_COLOR_BUFFER_BIT);
         menu_line();
         glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
-        drawstring(MID_COORD - 115, WINDOW_HEIGHT - 200, "CAR TRAFFIC SIMULATOR");
-        drawstring(MID_COORD - 47, WINDOW_HEIGHT - 300, "Developers:");
-        drawstring(MID_COORD - 140, WINDOW_HEIGHT - 330, "Sendov Yakov Denisovich | @cryder");
-        drawstring(MID_COORD - 160, WINDOW_HEIGHT - 360, "Babaev Salavat Shakirovich | @lilbabidjon");
-        drawstring(MID_COORD - 63, WINDOW_HEIGHT - 440, "4831001/10003");
-        drawstring(WINDOW_WIDTH / 4, WINDOW_HEIGHT - 470, "Institute of Cybersecurity and Information Protection");
-        drawstring(WINDOW_WIDTH / 6, WINDOW_HEIGHT - 500, "Copyright (c) 2022 Saint-Petersburg Polytechnic University, Russia");
+        drawstring(285, 600, "CAR TRAFFIC SIMULATOR");
+        drawstring(353, 500, "Developers:");
+        drawstring(260, 470, "Sendov Yakov Denisovich | @cryder");
+        drawstring(240, 440, "Babaev Salavat Shakirovich | @lilbabidjon");
+        drawstring(337, 360, "4831001/10003");
+        drawstring(200, 330, "Institute of Cybersecurity and Information Protection");
+        drawstring(133, 300, "Copyright (c) 2022 Saint-Petersburg Polytechnic University, Russia");
         menu_buttons(-7);
         glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
-        drawstring(MID_COORD - 20, WINDOW_HEIGHT - 580, "Back");
+        drawstring(380, 220, "Back");
         active.menu_active = false;
         glutSwapBuffers();
     }
@@ -70,14 +70,14 @@ void processing_buttons(int button)
         glClear(GL_COLOR_BUFFER_BIT);
         menu_line();
         glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
-        drawstring(MID_COORD - 115, WINDOW_HEIGHT - 200, "CAR TRAFFIC SIMULATOR");
-        drawstring(MID_COORD - 37, WINDOW_HEIGHT - 300, "Settings:");
-        drawstring(WINDOW_WIDTH / 10 - 34, WINDOW_HEIGHT - 360, "Spawn interval of machines (seconds):");
-        drawstring(WINDOW_WIDTH / 3 + 14, WINDOW_HEIGHT - 390, "Autosave:");
+        drawstring(285, 600, "CAR TRAFFIC SIMULATOR");
+        drawstring(363, 500, "Settings:");
+        drawstring(46, 440, "Spawn interval of machines (seconds):");
+        drawstring(280, 410, "Autosave:");
         settings_buttons();
         menu_buttons(-7);
         glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
-        drawstring(MID_COORD - 20, WINDOW_HEIGHT - 580, "Back");
+        drawstring(380, 220, "Back");
         active.menu_active = false;
         glutSwapBuffers();
     }
@@ -90,8 +90,8 @@ void processing_buttons(int button)
         draw_next_buttons(-290, 0);
         draw_next_buttons(0, 80);
         glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
-        drawstring(MID_COORD - 165, WINDOW_HEIGHT - 580, "Back");
-        drawstring(MID_COORD + 15, WINDOW_HEIGHT - 580, "Next");
+        drawstring(235, 220, "Back");
+        drawstring(415, 220, "Next");
         active.menu_active = false;
         glutSwapBuffers();
     }
@@ -159,18 +159,18 @@ void draw_mini_buttons(int w, int h, int flag)
 void draw_welcome_text()
 {
     glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
-    drawstring(MID_COORD - 95, WINDOW_HEIGHT - 200, "AUTOMOBILE TRAFFIC");
-    drawstring(MID_COORD - 200, WINDOW_HEIGHT - 270, "Good afternoon! A Car Traffic Simulator welcomes you.");
-    drawstring(MID_COORD - 180, WINDOW_HEIGHT - 300, "There are several types of roads available to you:");
-    drawstring(MID_COORD - 270, WINDOW_HEIGHT - 330, "a motorway, a road with an intersection, a road with several intersections.");
-    drawstring(MID_COORD - 200, WINDOW_HEIGHT - 360, "You can simulate an accident in one of the traffic lanes.");
-    drawstring(MID_COORD - 195, WINDOW_HEIGHT - 390, "To do this, you need to select one of the bands using");
-    drawstring(MID_COORD - 150, WINDOW_HEIGHT - 420, "the arrows on the keyboard (<- and ->).");
+    drawstring(305, 600, "AUTOMOBILE TRAFFIC");
+    drawstring(200, 530, "Good afternoon! A Car Traffic Simulator welcomes you.");
+    drawstring(220, 500, "There are several types of roads available to you:");
+    drawstring(130, 470, "a motorway, a road with an intersection, a road with several intersections.");
+    drawstring(200, 440, "You can simulate an accident in one of the traffic lanes.");
+    drawstring(205, 410, "To do this, you need to select one of the bands using");
+    drawstring(250, 380, "the arrows on the keyboard (<- and ->).");
     glColor3ub(239, 211, 52);
-    drawstring(MID_COORD - 180, WINDOW_HEIGHT - 450, "The strip you selected will be highlighted in yellow!");
+    drawstring(220, 350, "The strip you selected will be highlighted in yellow!");
     glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
-    drawstring(MID_COORD - 240, WINDOW_HEIGHT - 480, "To simulate an accident situation, you need to press the space bar.");
-    drawstring(MID_COORD - 80, WINDOW_HEIGHT - 510, "To continue, click next.");
+    drawstring(160, 320, "To simulate an accident situation, you need to press the space bar.");
+    drawstring(320, 290, "To continue, click next.");
 }
 
 void draw_next_buttons(int a, int b)
@@ -187,11 +187,11 @@ void draw_next_buttons(int a, int b)
 void text_buttons(int flag)
 {
     glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
-    if (flag == 0) drawstring(MID_COORD - 115, WINDOW_HEIGHT - 200, "CAR TRAFFIC SIMULATOR");
-    else if (flag == 1) drawstring(MID_COORD - 70, WINDOW_HEIGHT - 380, "Automobile traffic");
-    else if (flag == 2) drawstring(MID_COORD - 40, WINDOW_HEIGHT - 455, "Settings");
-    else if (flag == 3) drawstring(MID_COORD - 40, WINDOW_HEIGHT - 530, "About us");
-    else if (flag == 4) drawstring(MID_COORD - 20, WINDOW_HEIGHT - 605, "Exit");
+    if (flag == 0) drawstring(285, 600, "CAR TRAFFIC SIMULATOR");
+    else if (flag == 1) drawstring(330, 420, "Automobile traffic");
+    else if (flag == 2) drawstring(360, 345, "Settings");
+    else if (flag == 3) drawstring(360, 270, "About us");
+    else if (flag == 4) drawstring(380, 195, "Exit");
 }
 
 void map_choose()
