@@ -197,7 +197,7 @@ void map_choose()
 void menu_buttons(int h)
 {
     glColor3ub(COLOR_BUTTON_RED, COLOR_BUTTON_GREEN, COLOR_BUTTON_BLUE);
-    glBegin(GL_QUADS); // x, y 
+    glBegin(GL_QUADS);
     glVertex2i(MENU_BUTTON_LEFT, MENU_BUTTON_BOTTOM + (h - 3) * BUTTON_HEIGHT / 2);
     glVertex2i(MENU_BUTTON_LEFT, MENU_BUTTON_TOP + (h - 3) * BUTTON_HEIGHT / 2);
     glVertex2i(MENU_BUTTON_RIGHT, MENU_BUTTON_TOP + (h - 3) * BUTTON_HEIGHT / 2);

@@ -118,6 +118,7 @@ void init_car(car_model* car)
         else if (car->line == 3) car_coords(car, -44, 565);
     }
     car->texture_id = rand() % 19;
+    
 }
 
 Cars* remove_all(Cars* head)

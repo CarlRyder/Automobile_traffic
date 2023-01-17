@@ -9,7 +9,6 @@
 
 GLint Width = 800, Height = 800;
 
-void struct_init();
 void model_save(int map);
 void model_load();
 void motorway();
@@ -20,6 +19,7 @@ void reshape(GLint w, GLint h);
 void mouse_pressed(int button, int state, int x, int y);
 void keyboard(unsigned char key, int x, int y);
 void special_keyboard(int key, int x, int y);
+void struct_init();
 
 int main()
 {
@@ -31,7 +31,7 @@ int main()
     glutCreateWindow(WINDOW_NAME);
     struct_init();
     //FreeConsole();
-    sndPlaySound(L"sound/Main.wav", SND_ASYNC);
+    //sndPlaySound(L"sound/Main.wav", SND_ASYNC);
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutMouseFunc(mouse_pressed);
@@ -40,38 +40,36 @@ int main()
     glutMainLoop();
 }
 
-/*  Function struct_init() used for initialization:
-    1) Reading map textures into the map_tex structure
-    2) Boolean program state variables
-    3) Initialization of the initial map settings
-*/
 void struct_init()
 {
+    // Texture initialization
     map_tex.texture[0] = get_map_texture(MAP_ONE);
     map_tex.texture[1] = get_map_texture(MAP_TWO);
     map_tex.texture[2] = get_map_texture(MAP_THREE);
     get_car_texture();
     active.load_error = false;
-    enable.map_1 = false, enable.map_2 = false, enable.map_3 = false;
+    enable.map_1 = false;
+    enable.map_2 = false;
+    enable.map_3 = false;
+    // Main model struct initialization
     model.car_counts = 0;
     model.interval = 1;
     model.autosave = false;
     model.add_car = false;
-    model.traffic_light1 = true, model.traffic_light2 = false;
+    model.traffic_light1 = true;
+    model.traffic_light2 = false;
     model.stop_time = 0;
 }
 
-/*  Global variable initializing the "head" of the list of cars */
 Cars* head_car = NULL;
 
-/*  Function model_save(int map) used for:
-    Saving an active map simulation to a file map_save.txt contained in the root folder of the project
-*/
 void model_save(int map)
 {
     FILE* saves = fopen("map_save.txt", "w");
-    fprintf(saves, "model settings:\n%d\n%d\n%d\n%f\n%d\n%d\nñars stats:\n", map, model.line, model.car_counts, model.interval, model.autosave, model.time);
+    fprintf(saves, "model settings:\n");
+    fprintf(saves, "%d\n%d\n%d\n%f\n%d\n%d\n", map, model.line, model.car_counts, model.interval, model.autosave, model.time);
     Cars* temp = head_car;
+    fprintf(saves, "ñars stats:\n");
     while (temp != NULL)
     {
         fprintf(saves, "%d %d %f %f %d %d %d %f\n", temp->car.stop, temp->car.direction, temp->car.x[0], temp->car.y[0], temp->car.line, temp->car.turn, temp->car.texture_id, temp->car.speed);
@@ -81,9 +79,6 @@ void model_save(int map)
     pause(map, head_car, true);
 }
 
-/*  Function model_save(int map) used for:
-    Uploading a saved map simulation from a file map_save.txt contained in the root folder of the project
-*/
 void model_load()
 {
     FILE* saves = fopen("map_save.txt", "r");
