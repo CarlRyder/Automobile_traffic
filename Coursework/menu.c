@@ -20,7 +20,7 @@ void menu()
     }
     srand(time(NULL));
     // Drawing menu buttons
-    for (int i = -8; i < 2; i += 3) menu_buttons(i);
+    for (int i = -5; i < 5; i += 3) menu_buttons(i);
     // Rendering text in the menu
     for (int i = 0; i < 5; i++) text_buttons(i);
     active.menu_active = true;
@@ -41,7 +41,7 @@ void processing_buttons(int button)
         drawstring(MID_COORD - 63, WINDOW_HEIGHT - 440, "4831001/10003");
         drawstring(WINDOW_WIDTH / 4, WINDOW_HEIGHT - 470, "Institute of Cybersecurity and Information Protection");
         drawstring(WINDOW_WIDTH / 6, WINDOW_HEIGHT - 500, "Copyright (c) 2022 Saint-Petersburg Polytechnic University, Russia");
-        menu_buttons(-7);
+        menu_buttons(-4);
         glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
         drawstring(MID_COORD - 20, WINDOW_HEIGHT - 580, "Back");
         active.menu_active = false;
@@ -58,7 +58,7 @@ void processing_buttons(int button)
         drawstring(WINDOW_WIDTH / 10 - 34, WINDOW_HEIGHT - 360, "Spawn interval of machines (seconds):");
         drawstring(WINDOW_WIDTH / 3 + 14, WINDOW_HEIGHT - 390, "Autosave:");
         settings_buttons();
-        menu_buttons(-7);
+        menu_buttons(-4);
         glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
         drawstring(MID_COORD - 20, WINDOW_HEIGHT - 580, "Back");
         active.menu_active = false;
@@ -127,15 +127,15 @@ void draw_mini_buttons(int w, int h, int flag)
     if (h == 365)
     {
         glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
-        if (w == 0) drawstring(w + MID_COORD + (MINI_BUTTON_WIDTH >> 1) - 18, WINDOW_HEIGHT - h + 4, "0.75");
-        else if (w == 90) drawstring(w + MID_COORD + (MINI_BUTTON_WIDTH >> 1) - 5, WINDOW_HEIGHT - h + 4, "1");
-        else if (w == 180) drawstring(w + MID_COORD + (MINI_BUTTON_WIDTH >> 1) - 18, WINDOW_HEIGHT - h + 4, "1.25");
+        if (w == 0) drawstring(w + MID_COORD + (MINI_BUTTON_WIDTH / 2) - 18, WINDOW_HEIGHT - h + 4, "0.75");
+        else if (w == 90) drawstring(w + MID_COORD + (MINI_BUTTON_WIDTH / 2) - 5, WINDOW_HEIGHT - h + 4, "1");
+        else if (w == 180) drawstring(w + MID_COORD + (MINI_BUTTON_WIDTH / 2) - 18, WINDOW_HEIGHT - h + 4, "1.25");
     }
     else if (h == 395)
     {
         glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
-        if (w == 0) drawstring(w + MID_COORD + (MINI_BUTTON_WIDTH >> 1) - 15, WINDOW_HEIGHT - h + 5, "yes");
-        else if (w == 90) drawstring(w + MID_COORD + (MINI_BUTTON_WIDTH >> 1) - 10, WINDOW_HEIGHT - h + 5, "no");
+        if (w == 0) drawstring(w + MID_COORD + (MINI_BUTTON_WIDTH / 2) - 15, WINDOW_HEIGHT - h + 5, "yes");
+        else if (w == 90) drawstring(w + MID_COORD + (MINI_BUTTON_WIDTH / 2) - 10, WINDOW_HEIGHT - h + 5, "no");
     }
 }
 
@@ -160,10 +160,10 @@ void draw_next_buttons(int a, int b)
 {
     glColor3ub(COLOR_BUTTON_RED, COLOR_BUTTON_GREEN, COLOR_BUTTON_BLUE);
     glBegin(GL_QUADS);
-    glVertex2i(MENU_BUTTON_LEFT + b, MENU_BUTTON_BOTTOM + (-7) * (BUTTON_HEIGHT >> 1));
-    glVertex2i(MENU_BUTTON_LEFT + b, MENU_BUTTON_TOP + (-7) * (BUTTON_HEIGHT >> 1));
-    glVertex2i(MENU_BUTTON_RIGHT + a, MENU_BUTTON_TOP + (-7) * (BUTTON_HEIGHT >> 1));
-    glVertex2i(MENU_BUTTON_RIGHT + a, MENU_BUTTON_BOTTOM + (-7) * (BUTTON_HEIGHT >> 1));
+    glVertex2i(MENU_BUTTON_LEFT + b, MENU_BUTTON_BOTTOM + (-7) * BUTTON_HEIGHT / 2);
+    glVertex2i(MENU_BUTTON_LEFT + b, MENU_BUTTON_TOP + (-7) * BUTTON_HEIGHT / 2);
+    glVertex2i(MENU_BUTTON_RIGHT + a, MENU_BUTTON_TOP + (-7) * BUTTON_HEIGHT / 2);
+    glVertex2i(MENU_BUTTON_RIGHT + a, MENU_BUTTON_BOTTOM + (-7) * BUTTON_HEIGHT / 2);
     glEnd();
 }
 
@@ -182,7 +182,7 @@ void map_choose()
     buttons.map_button = true;
     glClearColor(COLOR_MENU_RED, COLOR_MENU_GREEN, COLOR_MENU_BLUE, 0);
     glClear(GL_COLOR_BUFFER_BIT);
-    for (int i = -8; i < 5; i += 3) menu_buttons(i);
+    for (int i = -5; i < 8; i += 3) menu_buttons(i);
     glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
     drawstring(MID_COORD - 95, WINDOW_HEIGHT - 200, "AUTOMOBILE TRAFFIC");
     drawstring(MID_COORD - 40, WINDOW_HEIGHT - 305, "Motorway");
@@ -198,9 +198,9 @@ void menu_buttons(int h)
 {
     glColor3ub(COLOR_BUTTON_RED, COLOR_BUTTON_GREEN, COLOR_BUTTON_BLUE);
     glBegin(GL_QUADS);
-    glVertex2i(MENU_BUTTON_LEFT, MENU_BUTTON_BOTTOM + h * (BUTTON_HEIGHT >> 1));
-    glVertex2i(MENU_BUTTON_LEFT, MENU_BUTTON_TOP + h * (BUTTON_HEIGHT >> 1));
-    glVertex2i(MENU_BUTTON_RIGHT, MENU_BUTTON_TOP + h * (BUTTON_HEIGHT >> 1));
-    glVertex2i(MENU_BUTTON_RIGHT, MENU_BUTTON_BOTTOM + h * (BUTTON_HEIGHT >> 1));
+    glVertex2i(MENU_BUTTON_LEFT, MENU_BUTTON_BOTTOM + (h - 3) * BUTTON_HEIGHT / 2);
+    glVertex2i(MENU_BUTTON_LEFT, MENU_BUTTON_TOP + (h - 3) * BUTTON_HEIGHT / 2);
+    glVertex2i(MENU_BUTTON_RIGHT, MENU_BUTTON_TOP + (h - 3) * BUTTON_HEIGHT / 2);
+    glVertex2i(MENU_BUTTON_RIGHT, MENU_BUTTON_BOTTOM + (h - 3) * BUTTON_HEIGHT / 2);
     glEnd();
 }
