@@ -36,10 +36,10 @@ void get_car_texture()
                 exit(0);
             }
             unsigned char part[2] = { 0 };
-            for (int i = 0; i < CAR_DATA_SIZE; i++)
+            for (unsigned char* p = &data[0]; p < &data[CAR_DATA_SIZE]; p++)
             {
                 fgets(part, 2, texture_file);
-                data[i] = part[0];
+                *p = *part;
             }
             fclose(texture_file);
             glGenTextures(1, &car_tex.texture[car_count - 1]);
@@ -73,10 +73,10 @@ GLuint get_map_texture(char* filename)
             exit(0);
         }
         unsigned char part[2] = { 0 };
-        for (int i = 0; i < MAP_DATA_SIZE; i++)
+        for (unsigned char* p = &data[0]; p < &data[MAP_DATA_SIZE]; p++)
         {
             fgets(part, 2, texture_file);
-            data[i] = part[0];
+            *p = *part;
         }
         fclose(texture_file);
         glGenTextures(1, &texture);
