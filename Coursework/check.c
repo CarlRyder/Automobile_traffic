@@ -31,35 +31,35 @@ int count_car(Cars* head)
 
 void info(int max, Cars* head)
 {
-    glColor3ub(239, 211, 52);
-    drawstring(5, WINDOW_HEIGHT - 20, "SERVICE INFORMATION");
+    //glColor3ub(239, 211, 52);
+    //drawstring(5, WINDOW_HEIGHT - 20, "SERVICE INFORMATION");
 
     glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
-    drawstring(5, WINDOW_HEIGHT - 40, "Current number of cars:");
+    //drawstring(5, WINDOW_HEIGHT - 40, "Current number of cars:");
     char num[5] = { 0 };
     _itoa(model.car_counts, num, 10);
     drawstring(204, WINDOW_HEIGHT - 40, num);
 
-    drawstring(5, WINDOW_HEIGHT - 60, "in the selected lane:");
+    //drawstring(5, WINDOW_HEIGHT - 60, "in the selected lane:");
     int car_line = count_car(head);
     char number[5] = { 0 };
     _itoa(car_line, number, 10);
     drawstring(174, WINDOW_HEIGHT - 60, number);
 
-    drawstring(5, WINDOW_HEIGHT - 80, "Bandwidth:");
+    //drawstring(5, WINDOW_HEIGHT - 80, "Bandwidth:");
     char value[5] = { 0 };
     _itoa(max, value, 10);
     drawstring(100, WINDOW_HEIGHT - 80, value);
 
-    if (enable.map_3 == true) drawstring(5, WINDOW_HEIGHT - 720, "Simulation time (sec):");
-    else drawstring(5, WINDOW_HEIGHT - 100, "Simulation time (sec):");
+    //if (enable.map_3 == true) drawstring(5, WINDOW_HEIGHT - 720, "Simulation time (sec):");
+    //else drawstring(5, WINDOW_HEIGHT - 100, "Simulation time (sec):");
     char model_time[10] = { 0 };
     _itoa(model.time, model_time, 10);
     if (enable.map_3 == true) drawstring(184, WINDOW_HEIGHT - 720, model_time);
     else drawstring(184, WINDOW_HEIGHT - 100, model_time);
 
-    if (enable.map_3 == true) drawstring(5, WINDOW_HEIGHT - 740, "Interval time (sec):");
-    else drawstring(5, WINDOW_HEIGHT - 120, "Interval time (sec):");
+    /*if (enable.map_3 == true) drawstring(5, WINDOW_HEIGHT - 740, "Interval time (sec):");
+    else drawstring(5, WINDOW_HEIGHT - 120, "Interval time (sec):");*/
     if (enable.map_3 == true)
     {
         if (model.interval == 0.75) drawstring(160, WINDOW_HEIGHT - 740, "0.75");
@@ -73,8 +73,8 @@ void info(int max, Cars* head)
         else if (model.interval == 1.25) drawstring(160, WINDOW_HEIGHT - 120, "1.25");
     }
 
-    if (enable.map_3 == true) drawstring(5, WINDOW_HEIGHT - 760, "Autosave:");
-    else drawstring(5, WINDOW_HEIGHT - 140, "Autosave:");
+    /*if (enable.map_3 == true) drawstring(5, WINDOW_HEIGHT - 760, "Autosave:");
+    else drawstring(5, WINDOW_HEIGHT - 140, "Autosave:");*/
     if (enable.map_3 == true)
     {
         if (model.autosave == true) drawstring(90, WINDOW_HEIGHT - 760, "On");
@@ -96,7 +96,7 @@ void change_line(int map, Cars* head)
         control_lines(model.line);
         glColor3ub(COLOR_WHITE, COLOR_WHITE, COLOR_WHITE);
         drawstring(MID_COORD - 200, WINDOW_HEIGHT - 40, "In order to provoke an accident, press the F5 key");
-        drawstring(MID_COORD - 340, WINDOW_HEIGHT - 760, "To change the selected lane for an accident, use the arrows on the keyboard (<- ->)");
+        drawstring(MID_COORD - 300, WINDOW_HEIGHT - 760, "To change the selected lane for an accident, use the arrows on the keyboard (<- ->)");
         glutSwapBuffers();
         if (GetAsyncKeyState(VK_LEFT) & 0x1 && model.line > 1) model.line--;
         if (enable.map_1 == true)
