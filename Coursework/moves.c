@@ -229,8 +229,7 @@ int overtaking(int count_line, Cars** car_dir, int num_ccar, unsigned short* ran
 
 void find_dist(char mode_coord, float coord_diff, Cars** car_dir, int num_dcar, int num_ccar, int count_line, unsigned short* range_dir1, int num_dir)
 {
-    float dcar = 0.0;
-    float ccar = 0.0;
+    float dcar = 0.0, ccar = 0.0;
     if (mode_coord == 'y')
     {
         dcar = car_dir[num_dcar]->car.y[0];
@@ -241,19 +240,10 @@ void find_dist(char mode_coord, float coord_diff, Cars** car_dir, int num_dcar, 
         dcar = car_dir[num_dcar]->car.x[0];
         ccar = car_dir[num_ccar]->car.x[0];
     }
-    int changing = 0;
-    if (coord_diff == 44.0 && dcar - ccar > 0 && dcar - ccar <= MIN_DISTANCE)
+    float diff = dcar - ccar;
+    if ((coord_diff == 44.0 && diff > 0 && diff <= MIN_DISTANCE) || (coord_diff == -44.0 && diff < 0 && fabsf(diff) <= MIN_DISTANCE))
     {
-        changing = overtaking(count_line, car_dir, num_ccar, range_dir1, num_dir, mode_coord);
-        if (changing == 0)
-        {
-            car_dir[num_ccar]->car.speed = car_dir[num_dcar]->car.speed;
-        }
-    }
-    else if (coord_diff == -44.0 && dcar - ccar < 0 && fabsf(dcar - ccar) <= MIN_DISTANCE)
-    {
-        changing = overtaking(count_line, car_dir, num_ccar, range_dir1, num_dir, mode_coord);
-        if (changing == 0)
+        if (overtaking(count_line, car_dir, num_ccar, range_dir1, num_dir, mode_coord) == 0)
         {
             car_dir[num_ccar]->car.speed = car_dir[num_dcar]->car.speed;
         }

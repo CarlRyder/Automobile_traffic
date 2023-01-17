@@ -407,8 +407,7 @@ void mult_crossroad()
         glutSwapBuffers();
         clock_t start = clock(), end = 0, begin = clock(), traffic1 = clock(), traffic2 = 0;
         clock_t auto_save1 = clock(), auto_save2 = 0, stop_timer1 = 0, stop_timer2 = 0;;
-        int max_cars = 0, time = 0, save_dir = 0, save_line = 0, stop_time = 0;
-        float save_x = 0, save_y = 0;
+        int max_cars = 0, time = 0;
         bool flag_stop = false;
         if (model.time != 0) time = model.time;
         while (true)
@@ -463,9 +462,6 @@ void mult_crossroad()
                 car_draw(&tmp->car);
                 if (tmp->car.direction == 1)
                 {
-                    save_dir = tmp->car.direction;
-                    save_line = tmp->car.line;
-                    save_y = tmp->car.y[0];
                     if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 6000;
                     else
                     {
@@ -477,9 +473,6 @@ void mult_crossroad()
                 }
                 else if (tmp->car.direction == 2)
                 {
-                    save_dir = tmp->car.direction;
-                    save_line = tmp->car.line;
-                    save_y = tmp->car.y[0];
                     if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 6000;
                     else
                     {
@@ -491,9 +484,6 @@ void mult_crossroad()
                 }
                 else if (tmp->car.direction == 3 || tmp->car.direction == 5)
                 {
-                    save_dir = tmp->car.direction;
-                    save_line = tmp->car.line;
-                    save_x = tmp->car.x[0];
                     if (tmp->car.x[0] > -44) tmp->car.x[0] -= tmp->car.speed / 6000;
                     else
                     {
@@ -505,9 +495,6 @@ void mult_crossroad()
                 }
                 else if (tmp->car.direction == 4 || tmp->car.direction == 6)
                 {
-                    save_dir = tmp->car.direction;
-                    save_line = tmp->car.line;
-                    save_x = tmp->car.x[0];
                     if (tmp->car.x[0] < 844) tmp->car.x[0] += tmp->car.speed / 6000;
                     else
                     {
