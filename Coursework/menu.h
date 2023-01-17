@@ -38,6 +38,7 @@ struct stats
 } model;
 
 void menu();
+void menu_line();
 void drawstring(float x, float y, char* string);
 void processing_buttons(int button);
 void settings_buttons();
