@@ -19,9 +19,9 @@ void init_car(car_model* car)
     model.car_counts++;
     car->turn = false;
     car->stop = false;
-    car->direction = rand() % 2 + 1;
-    if (enable.map_2 == true) car->direction = rand() % 4 + 1;
-    if (enable.map_3 == true) car->direction = rand() % 6 + 1;
+    if (enable.map_1) car->direction = rand() % 2 + 1;
+    else if (enable.map_2) car->direction = rand() % 4 + 1;
+    else if (enable.map_3) car->direction = rand() % 6 + 1;
     car->line = rand() % 3 + 1;
     if (model.add_car == true)
     {

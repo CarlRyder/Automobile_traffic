@@ -231,7 +231,7 @@ void motorway()
                 car_draw(&tmp->car);
                 if (tmp->car.direction == 1)
                 {
-                    if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 3000;
+                    if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 7000;
                     else
                     {
                         if (tmp == head_car) head_car = delete_headcar(head_car);
@@ -242,7 +242,7 @@ void motorway()
                 }
                 else if (tmp->car.direction == 2)
                 {
-                    if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 3000;
+                    if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 7000;
                     else
                     {
                         if (tmp == head_car) head_car = delete_headcar(head_car);
@@ -334,7 +334,7 @@ void crossroad()
                 car_draw(&tmp->car);
                 if (tmp->car.direction == 1)
                 {
-                    if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 3000;
+                    if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 7000;
                     else
                     {
                         if (tmp == head_car) head_car = delete_headcar(head_car);
@@ -345,7 +345,7 @@ void crossroad()
                 }
                 else if (tmp->car.direction == 2)
                 {
-                    if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 3000;
+                    if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 7000;
                     else
                     {
                         if (tmp == head_car) head_car = delete_headcar(head_car);
@@ -356,7 +356,7 @@ void crossroad()
                 }
                 else if (tmp->car.direction == 3)
                 {
-                    if (tmp->car.x[0] > -44) tmp->car.x[0] -= tmp->car.speed / 3000;
+                    if (tmp->car.x[0] > -44) tmp->car.x[0] -= tmp->car.speed / 7000;
                     else
                     {
                         if (tmp == head_car) head_car = delete_headcar(head_car);
@@ -367,7 +367,7 @@ void crossroad()
                 }
                 else if (tmp->car.direction == 4)
                 {
-                    if (tmp->car.x[0] < 844) tmp->car.x[0] += tmp->car.speed / 3000;
+                    if (tmp->car.x[0] < 844) tmp->car.x[0] += tmp->car.speed / 7000;
                     else
                     {
                         if (tmp == head_car) head_car = delete_headcar(head_car);
@@ -466,7 +466,7 @@ void mult_crossroad()
                     save_dir = tmp->car.direction;
                     save_line = tmp->car.line;
                     save_y = tmp->car.y[0];
-                    if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 3000;
+                    if (tmp->car.y[0] < 844) tmp->car.y[0] += tmp->car.speed / 7000;
                     else
                     {
                         if (tmp == head_car) head_car = delete_headcar(head_car);
@@ -480,7 +480,7 @@ void mult_crossroad()
                     save_dir = tmp->car.direction;
                     save_line = tmp->car.line;
                     save_y = tmp->car.y[0];
-                    if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 3000;
+                    if (tmp->car.y[0] > -44) tmp->car.y[0] -= tmp->car.speed / 7000;
                     else
                     {
                         if (tmp == head_car) head_car = delete_headcar(head_car);
@@ -494,7 +494,7 @@ void mult_crossroad()
                     save_dir = tmp->car.direction;
                     save_line = tmp->car.line;
                     save_x = tmp->car.x[0];
-                    if (tmp->car.x[0] > -44) tmp->car.x[0] -= tmp->car.speed / 3000;
+                    if (tmp->car.x[0] > -44) tmp->car.x[0] -= tmp->car.speed / 7000;
                     else
                     {
                         if (tmp == head_car) head_car = delete_headcar(head_car);
@@ -508,7 +508,7 @@ void mult_crossroad()
                     save_dir = tmp->car.direction;
                     save_line = tmp->car.line;
                     save_x = tmp->car.x[0];
-                    if (tmp->car.x[0] < 844) tmp->car.x[0] += tmp->car.speed / 3000;
+                    if (tmp->car.x[0] < 844) tmp->car.x[0] += tmp->car.speed / 7000;
                     else
                     {
                         if (tmp == head_car) head_car = delete_headcar(head_car);
@@ -611,15 +611,15 @@ void mouse_pressed(int button, int state, int x, int y)
         }
         else if (buttons.menu_button_1 == true)
         {
-            if (x >= MENU_BUTTON_LEFT && x <= MENU_BUTTON_LEFT + 60 && y >= 550 && y <= 600)
-            {
-                buttons.menu_button_1 = false;
-                glutPostRedisplay();
-            }
-            else if (x >= MENU_BUTTON_LEFT + 80 && x <= MENU_BUTTON_RIGHT && y >= 550 && y <= 600)
+            if (x >= MENU_BUTTON_LEFT + 80 && x <= MENU_BUTTON_RIGHT && y >= 550 && y <= 600)
             {
                 buttons.menu_button_1 = false;
                 map_choose();
+            }
+            else if (x >= MENU_BUTTON_LEFT && x <= MENU_BUTTON_LEFT + 60 && y >= 550 && y <= 600)
+            {
+                buttons.menu_button_1 = false;
+                glutPostRedisplay();
             }
         }
         else if (buttons.map_button == true)
